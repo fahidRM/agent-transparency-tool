@@ -1,0 +1,13 @@
+# Editor & OS folders
+.DS_Strore/
+.idea/
+
+# dependencies
+node_modules/
+
+# project builds
+mas-graphical-debugger*/
+
+# package lock file
+package-lock.json
+
