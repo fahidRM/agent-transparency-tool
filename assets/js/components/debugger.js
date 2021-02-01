@@ -1,3 +1,4 @@
+
 angular.module('app.debugger', [])
     .controller(
         'DebuggerController',
@@ -25,7 +26,7 @@ angular.module('app.debugger', [])
                 }
 
                 const INITIAL_STATE = {
-                    agents: {all: ["Alice", "Bond", "Derek"], selected: "N/A"},
+                    agents: {all: [], selected: null},
                     agentHistory: {
                         activities: DEFAULTS.rootNode,
                         beliefs: {},
@@ -44,7 +45,7 @@ angular.module('app.debugger', [])
                 const http = require('http').createServer(app); // required for server...
 
 
-                var vm = this;          // view model
+                let vm = this;          // view model
                 vm.agents = {...INITIAL_STATE.agents};
                 vm.autoscroll = true;
                 vm.history = {...INITIAL_STATE.history};
@@ -52,21 +53,21 @@ angular.module('app.debugger', [])
                 vm.selectedAgent = "";
 
 
-                /** D3 vars **/
+                /** D3 lets **/
                 $scope.currentSequence = 0;
-                var diagonal,
-                    div,
-                    duration = 750,
+                let diagonal,
+                    div,            // container div of the SVG chart
+                    duration = 0,   // transition period
                     margin = {top: 20, right: 10, bottom: 20, left: 10},
-                    height = 370 - margin.top - margin.bottom,
                     i = 0,
-                    poll,
+                    //poll,
                     root,
-                    sessionTag = "",
+                    //sessionTag = "",
                     svg,
                     tree,
-                    tries = 0,
                     width =  10000000;
+
+
 
                 /**
                  * vm.initialise
@@ -75,27 +76,7 @@ angular.module('app.debugger', [])
                  */
                 vm.initialise = function (agent) {
                     setupRestApi();
-
-                    tree = d3.layout.tree()
-                        .size([height, width]);
-                    diagonal = d3.svg.diagonal()
-                        .projection(function(d) { return [d.y, d.x]; });
-                    svg = d3.select("#visualisation_board").append("svg")
-                        .attr("width", width + margin.right + margin.left)
-                        .attr("height", height + margin.top + margin.bottom)
-                        .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-                    root = {};
-                    if (agent !== undefined) {
-                        root =  _.cloneDeep(vm.history[agent].activities);
-                    }
-                    root.x0 = height / 2;
-                    root.y0 = 0;
-                    updateVisualisation(root);
-                    d3.select(self.frameElement).style("height", "500px");
-
+                    setupVisualisationBoard(agent);
                 }
 
                 /**
@@ -104,8 +85,8 @@ angular.module('app.debugger', [])
                  * @param agent Agent Name
                  */
                 vm.selectAgent = function (agent) {
+                    vm.agents.selected = agent;
                     const vBoard = angular.element(document.querySelector("#visualisation_board"));
-                    vm.agents.current = agent;
                     vBoard.empty();
                     vm.initialise(agent);
                 }
@@ -114,7 +95,7 @@ angular.module('app.debugger', [])
                     vm.autoscroll =  ! vm.autoscroll;
                 }
                 /**
-                 * Toggles the Debugger's state
+                 * Toggles the server state
                  */
                 vm.toggleDebugging = function() {
                     if (vm.isRunning) {
@@ -135,12 +116,40 @@ angular.module('app.debugger', [])
                  * apps post data
                  */
                 function setupRestApi () {
+                    app.use(bodyParser.json())
                     app.post('/log', (req, res) => {
                         // inform client that request has been received
                         res.send();
                         // handle request
                         onStateReceived(req.body);
                     });
+                }
+
+                /**
+                 * setupVisualisationBoard
+                 *
+                 * Sets up the svg container for visualisation
+                 * @param agent
+                 */
+                function setupVisualisationBoard (agent) {
+                    const height = document.getElementById('view_region').offsetHeight - document.getElementById('view_header').offsetHeight - margin.top - margin.bottom;
+
+                    tree = d3.layout.tree().size([height, width]);
+                    diagonal = d3.svg.diagonal()
+                        .projection(function(d) { return [d.y, d.x]; });
+                    svg = d3.select("#visualisation_board").append("svg")
+                        .attr("width", width + margin.right + margin.left + 400)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    root = {};
+                    if (agent !== undefined) {
+                        root =  _.cloneDeep(vm.history[agent].activities);
+                    }
+                    root.x0 = height / 2;
+                    root.y0 = 0;
+                    updateVisualisation(root);
                 }
 
                 /**
@@ -184,8 +193,8 @@ angular.module('app.debugger', [])
                     }
                     // visualise the agent if currently not visualising any agent...
                     // this helps us to ensure we have to do nothing on first launch.
-                    if (vm.agents.current === null) {
-                        vm.agents.current = concernedAgent;
+                    if (vm.agents.selected === null) {
+                        vm.selectAgent(concernedAgent);
                     }
                     // mutate the object.....
                     state.TYPE_INFO.SEQUENCE_NUMBER =  state.SEQUENCE_NUMBER;
@@ -213,7 +222,7 @@ angular.module('app.debugger', [])
 
                     // update the visualisation if we are currently looking at
                     // the agent with the state update...
-                    if (vm.agents.current === state.AGENT) {
+                    if (vm.agents.selected === state.AGENT) {
                         updateChart(state.AGENT);
                     }
 
@@ -224,17 +233,31 @@ angular.module('app.debugger', [])
                     updateVisualisation(root);
                 }
 
+                function getNodeColour (d) {
+                    let nodeColour;
+                    if (d["FAILURE_REASON"] !== undefined) {
+                        nodeColour = DEFAULTS.colours.failureNode;
+                    }
+                    else if (d.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
+                    else if ((d.CONTEXT_PASSED === undefined) || (d.CONTEXT_PASSED)) {
+                        nodeColour = DEFAULTS.colours.traversableNode
+                    }
+                    else {
+                        nodeColour =  DEFAULTS.colours.unTraversableNode
+                    }
+                    return nodeColour;
+                }
+
                 function updateVisualisation (source) {
                     // Compute the new tree layout.
-
                     if (div === undefined) {
                         div = d3.select("body").append("div")
                             .attr("class", "tooltip")
                             .style("opacity", 1e-6);
                     }
 
-                    var nodes = tree.nodes(root).reverse();
-                    var links = tree.links(nodes);
+                    let nodes = tree.nodes(root).reverse();
+                    let links = tree.links(nodes);
 
                     links = _.remove(links, function (link) {
                         return (link.target.IS_PADDING_NODE === undefined);
@@ -246,18 +269,18 @@ angular.module('app.debugger', [])
                     nodes.forEach(function(d) { d.y = d.depth * 180; });
 
                     // Update the nodes…
-                    var node = svg.selectAll("g.node").data(
+                    let node = svg.selectAll("g.node").data(
                         nodes, function(d) {
                             return d.id || (d.id = ++i);
                         });
 
                     // Enter any new nodes at the parent's previous position.
-                    var nodeEnter = node.enter()
+                    let nodeEnter = node.enter()
                         .append("g")
                         .attr("class", "node")
                         .attr(
                             "transform",
-                            function(d) {
+                            function() {
                                 return "translate(" + source.y0 + "," + source.x0 + ")";
                             })
                         .on("click", selectState);
@@ -270,43 +293,26 @@ angular.module('app.debugger', [])
                         .style(
                             "fill",
                             function(d) {
-                                /*return (d.IS_PADDING_NODE !== undefined) ? "white" :
-
-                                    (d.CONTEXT_PASSED === undefined) || d.CONTEXT_PASSED ?
-                                        DEFAULTS.colours.traversableNode : DEFAULTS.colours.unTraversableNode;*/
-                                let nodeColour = "white"
-
-                                if (d.FAILURE_REASON !== undefined) {
-                                    nodeColour = DEFAULTS.colours.failureNode;
-                                }
-                                else if (d.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
-                                else if ((d.CONTEXT_PASSED === undefined) || (d.CONTEXT_PASSED)) {
-                                    nodeColour = DEFAULTS.colours.traversableNode
-                                }
-                                else {
-                                    nodeColour =  DEFAULTS.colours.unTraversableNode
-                                }
-
-                                return nodeColour;
+                                return getNodeColour(d);
                             });
 
                     nodeEnter.append("svg:text")
                         .attr(
                             "x",
                             function(d) {
-                                return d.children || d._children ? -13 : 13;
+                                return d.children || d["_children"] ? -13 : 13;
                             })
                         .attr("dy", ".35em")
                         .attr(
                             "text-anchor",
                             function(d) {
-                                return d.children || d._children ? "end" : "start";
+                                return d.children || d["_children"] ? "end" : "start";
                             })
                         .text(function(d) { return "\n" + d.IDENTIFIER; })
                         .style("fill-opacity", 1e-6);
 
                     // Transition nodes to their new position.
-                    var nodeUpdate = node.transition()
+                    let nodeUpdate = node.transition()
                         .duration(duration)
                         .attr("transform", function(d) {
                             return "translate(" + d.y + "," + d.x + ")";
@@ -315,30 +321,16 @@ angular.module('app.debugger', [])
                     nodeUpdate.select("circle")
                         .attr("r", 10)
                         .style("fill", function(d) {
-
-                            let nodeColour = "white"
-
-                            if (d.FAILURE_REASON !== undefined) {
-                                nodeColour = DEFAULTS.colours.failureNode;
-                            }
-                            else if (d.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
-                            else if ((d.CONTEXT_PASSED === undefined) || (d.CONTEXT_PASSED)) {
-                                nodeColour = DEFAULTS.colours.traversableNode
-                            }
-                            else {
-                                nodeColour =  DEFAULTS.colours.unTraversableNode
-                            }
-
-                            return nodeColour;
+                            return getNodeColour(d);
                         });
 
                     nodeUpdate.select("text")
                         .style("fill-opacity", 1);
 
                     // Transition exiting nodes to the parent's new position.
-                    var nodeExit = node.exit().transition()
+                    let nodeExit = node.exit().transition()
                         .duration(duration)
-                        .attr("transform", function(d) {
+                        .attr("transform", function() {
                             return "translate(" + source.y + "," + source.x + ")";
                         })
                         .remove();
@@ -351,7 +343,7 @@ angular.module('app.debugger', [])
 
 
                     // Update the links…
-                    var link = svg.selectAll("path.link")
+                    let link = svg.selectAll("path.link")
                         .data(links, function(d) {
                             if (d.IS_PADDING_NODE !== undefined) {
                                 return null;
@@ -365,8 +357,8 @@ angular.module('app.debugger', [])
                     // Enter any new links at the parent's previous position.
                     link.enter().insert("path", "g")
                         .attr("class", "link")
-                        .attr("d", function(d) {
-                            var o = {x: source.x0, y: source.y0};
+                        .attr("d", function() {
+                            let o = {x: source.x0, y: source.y0};
                             return diagonal({source: o, target: o});
                         });
 
@@ -378,8 +370,8 @@ angular.module('app.debugger', [])
                     // Transition exiting nodes to the parent's new position.
                     link.exit().transition()
                         .duration(duration)
-                        .attr("d", function(d) {
-                            var o = {x: source.x, y: source.y};
+                        .attr("d", function() {
+                            let o = {x: source.x, y: source.y};
                             return diagonal({source: o, target: o});
                         })
                         .remove();
@@ -387,8 +379,9 @@ angular.module('app.debugger', [])
                     // Stash the old positions for transition.
 
 
+                    let visualisationBoardContainer = document.getElementById("view_region");
                     let visualisationBoard = document.getElementById("visualisation_board");
-                    const visualisationBoardWidth = visualisationBoard.offsetWidth;
+                    const visualisationBoardVisibleWidth = visualisationBoardContainer.offsetWidth;
                     let lastNodePosition = 0;
 
                     nodes.forEach(function(d) {
@@ -399,8 +392,8 @@ angular.module('app.debugger', [])
                     });
 
                     if (vm.autoscroll) {
-                        if (lastNodePosition > (0.8 * visualisationBoardWidth)) {
-                            visualisationBoard.scrollLeft = lastNodePosition - (0.8 * visualisationBoardWidth);
+                        if (lastNodePosition > (0.8 * visualisationBoardVisibleWidth)) {
+                            visualisationBoard.scrollLeft = lastNodePosition - (0.8 * visualisationBoardVisibleWidth);
                         }
                     }
                 }
@@ -560,16 +553,15 @@ angular.module('app.debugger', [])
                     const state = stateLog.TYPE_INFO;
                     const agent = stateLog.AGENT;
 
-                    if (vm.history[agent].branch === null) { return; }
-                    else {
+                    if (vm.history[agent].branch !== null) {
                         let targetIndex = 0;
                         vm.history[agent].branch.forEach(function(item, index) {
                             if (
                                 (item.IDENTIFIER === state.IDENTIFIER)
                                 &&
-                                (item.CODE_LINE === state.CODE_LINE)
+                                (item["CODE_LINE"] === state["CODE_LINE"])
                                 &&
-                                (item.CODE_FILE === state.CODE_FILE)
+                                (item["CODE_FILE"] === state["CODE_FILE"])
                             ){
                                 targetIndex =  index;
                             }
@@ -597,7 +589,7 @@ angular.module('app.debugger', [])
                     if (vm.history[agent].current === null) { return; }
 
                     if (vm.history[agent].current.IDENTIFIER.trim() === state.IDENTIFIER.trim()) {
-                        vm.history[agent].current['FAILURE_REASON'] = state.REASON;
+                        vm.history[agent].current['FAILURE_REASON'] = state["REASON"];
                     }
 
                 }
@@ -633,12 +625,11 @@ angular.module('app.debugger', [])
                     if (
                         vm.history[agent].beliefs[previousSequence + ""] !== undefined
                     ) {
-                        let pp =  _.differenceBy(
+                        vm.history[agent].removedBeliefs[sequence + ""] = _.differenceBy(
                             vm.history[agent].beliefs[previousSequence + ""],
                             currentState,
                             "value"
                         );
-                        vm.history[agent].removedBeliefs[sequence + ""] = pp;
                     } else {
                         vm.history[agent].removedBeliefs[sequence + ""] = [];
                     }
@@ -646,16 +637,16 @@ angular.module('app.debugger', [])
                 }
 
                 vm.getCurrentBB = function() {
-                    if (vm.agents.current === null) { return []; }
+                    if (vm.agents.selected === null) { return []; }
                     let rt = []
-                    if (vm.history[vm.agents.current].beliefs !== undefined) {
-                        rt = vm.history[vm.agents.current].beliefs[("S_" + $scope.currentSequence + "").trim()];
+                    if (vm.history[vm.agents.selected].beliefs !== undefined) {
+                        rt = vm.history[vm.agents.selected].beliefs[("S_" + $scope.currentSequence + "").trim()];
                     }
                     return rt;
                 }
 
                 function swapBranchNodes (agent, branch, indexA, indexB) {
-                    var temp = branch[indexA];
+                    let temp = branch[indexA];
                     branch[indexA] = branch[indexB];
                     branch[indexB] = temp;
                     vm.history[agent].last["children"] = branch;
@@ -669,7 +660,8 @@ angular.module('app.debugger', [])
                 function selectState (state) {
                     vm.autoscroll = false;
                     vm.freeze = true;
-                    showStateBB(state.SEQUENCE_NUMBER + 1);
+                    console.log(state);
+                    //showStateBB(state.SEQUENCE_NUMBER + 1);
                 }
 
                 function mouseover() {
@@ -684,12 +676,12 @@ angular.module('app.debugger', [])
                         .style("top", (d3.event.pageY) + "px");
                     div.append("b").text(d.IDENTIFIER);
 
-                    if (d.CODE_FILE !== undefined) {
+                    if (d["CODE_FILE"] !== undefined) {
                         div.append("br");
                         div.append("br");
-                        div.append("b").text("Code file: " + d.CODE_FILE);
+                        div.append("b").text("Code file: " + d["CODE_FILE"]);
                         div.append("br");
-                        div.append("b").text("Code line: " + d.CODE_LINE);
+                        div.append("b").text("Code line: " + d["CODE_LINE"]);
                     }
 
 
@@ -708,13 +700,13 @@ angular.module('app.debugger', [])
                         });
                     }
 
-                    if (d.FAILURE_REASON !== undefined) {
+                    if (d["FAILURE_REASON"] !== undefined) {
                         div.append("br");
                         div.append("br");
                         div.append("b").text("Failure: ");
                         div.append("br");
                         div.append("span")
-                            .text( d.FAILURE_REASON)
+                            .text( d["FAILURE_REASON"])
                             .style("color", DEFAULTS.colours.unTraversableNode);
                     }
 
@@ -727,6 +719,57 @@ angular.module('app.debugger', [])
                 }
 
 
+                vm.mimicAction =  function () {
+
+                    onStateReceived({
+                        "AGENT": "Alice",
+                        "SEQUENCE_NUMBER": 11,
+                        "TYPE": "ACTION",
+                        "TYPE_INFO": {
+                            "IDENTIFIER": "move(1,0)",
+                            VALUES: "",
+                            ACTION: undefined
+                        }
+
+                    });
+                }
+
+                vm.mimicPlanTrace =  function () {
+                    onStateReceived({
+                        "TYPE": "PLAN_TRACE",
+                        "AGENT": "Alice",
+                        "TYPE_INFO": [
+                            {
+                                "IDENTIFIER": "opt_a",
+                                "CONTEXT": "has_cat & has_bicycle",
+                                "CONTEXT_PASSED": false,
+                                "CONTEXT_META": [
+                                    ["has_cattle", false],
+                                    ["has_beans", true]
+                                ]
+                            },
+                            {
+                                "IDENTIFIER": "opt_c",
+                                "CONTEXT": "has_cat & not has_bicycle",
+                                "CONTEXT_PASSED": true,
+                                "CONTEXT_META": [
+                                    ["is_plant_farm", true],
+                                    ["has_beans", true]
+                                ]
+                            }
+                        ]
+                    });
+                }
+                vm.mimicPlanSelection =  function () {
+                    onStateReceived({
+                        "TYPE": "PLAN_SELECTION",
+                        "AGENT": "Alice",
+                        "TYPE_INFO": {
+                            "IDENTIFIER": "opt_c",
+                            "CONTEXT": "has_cat & not has_bicycle"
+                        }
+                    });
+                }
             }
         ]
     )

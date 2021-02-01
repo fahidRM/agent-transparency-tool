@@ -30,3 +30,70 @@
 }
 
 .dropdown-content a:hover {background-color: #116cd6; color: #fff;}
+
+.fit {
+    height: inherit;
+}
+
+.fit-and-scroll {
+    width: inherit;
+    height: inherit !important;
+    overflow: -moz-scrollbars-vertical;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    padding: 20px 20px 20px 20px;
+}
+
+.node {
+    cursor: pointer;
+}
+
+.node text {
+    font: 12px sans-serif;
+}
+
+.link {
+    fill: none;
+    stroke: #c0c0c0;
+    stroke-width: 1px;
+}
+
+div.tooltip {
+
+    position: absolute;
+
+    background: #f5fcfa;
+
+    border: solid 1px #dcdde1;
+    border-radius: 0px;
+
+    font: 10px sans-serif;
+
+    max-width: 200px;
+    max-height: 500px;
+
+    padding: 7px 15px 7px 15px;
+    pointer-events: none;
+
+    text-align: left;
+
+}
+
+.sc-grid {
+    overflow: scroll;
+    height: 100%;
+    background: red;
+}
+
+.deleted_belief {
+    background: #fdd49a;
+}
+
+.normalised-text {
+    text-transform: none !important;
+    word-wrap: break-word;
+}
+
+.info-bar {
+    border-bottom: 1px solid black;
+}

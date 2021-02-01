@@ -5,7 +5,7 @@
         <link href="assets/css/photon.min.css" rel="stylesheet" />
         <link href="assets/css/app.css" rel="stylesheet" />
     </head>
-    <body ng-app = "graphical-debugger" ng-controller = "DebuggerController as debugger" ng-init = "debugger.initialise()" class="animsition">
+    <body ng-app = "graphical-debugger" ng-controller = "DebuggerController as debugger"  class="animsition" ng-init="debugger.initialise()">
     <div class="window">
         <div class="window-content">
             <div class="pane-group">
@@ -31,9 +31,9 @@
                     <nav ng-include src="'belief_browser.html'"></nav>
                 </div>
 
-                <div class="pane">
+                <div class="pane fit" id="view_region">
                     <!-- Agent Selection-->
-                    <header class="toolbar toolbar-header">
+                    <header class="toolbar toolbar-header" id="view_header">
                         <div class="toolbar-actions">
                             <button class="btn btn-default btn-dropdown dropdown">
                                 <span class="icon icon-user dropbtn" ></span>
@@ -51,7 +51,7 @@
 
                     </header>
                     <!-- Visualisation -->
-                    <div id="visualisation_board" class="scroll-fix">
+                    <div id="visualisation_board" class="fit-and-scroll">
                     </div>
                 </div>
             </div>
@@ -61,6 +61,21 @@
                 <button class="btn btn-default pull0left">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;Settings
+                </button>
+
+                <button class="btn btn-default pull0left" ng-click="debugger.mimicAction()">
+                    <span class="icon icon-home icon-tools"></span>
+                    &nbsp;&nbsp;a
+                </button>
+
+                <button class="btn btn-default pull0left" ng-click="debugger.mimicPlanTrace()">
+                    <span class="icon icon-home icon-tools"></span>
+                    &nbsp;&nbsp;pt
+                </button>
+
+                <button class="btn btn-default pull0left" ng-click="debugger.mimicPlanSelection()">
+                    <span class="icon icon-home icon-tools"></span>
+                    &nbsp;ps
                 </button>
 
                 <button class="btn  pull-right"
@@ -112,7 +127,7 @@
     <!-- dependencies -->
     <script>var jQuery=window.$=window.jQuery=require('./assets/js/dependencies/jquery-3.2.1.min.js');</script>
     <script src="assets/js/dependencies/angular.min.js"></script>
-    <script src="assets/js/d3.min.js"></script>
+    <script>var d3=window.$=window.d3=require('./assets/js/dependencies/d3.min.js');</script>
     <script src="assets/js/dependencies/lodash.min.js"></script>
     <!-- necessary js -->
     <script>
