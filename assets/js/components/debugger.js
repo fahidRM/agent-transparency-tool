@@ -422,6 +422,7 @@ angular.module('app.debugger', [])
                     }
                     state.forEach(function (entry) {
                         entry.SEQUENCE_NUMBER = stateLog.SEQUENCE_NUMBER;
+                        entry.AGENT = stateLog.AGENT;
                     });
 
                     vm.history[agent].branch = state;
@@ -610,7 +611,8 @@ angular.module('app.debugger', [])
                             if (valueParts[0].trim().length > 0){
                                 currentState.push({
                                     value: valueParts[0].trim(),
-                                    source: valueParts[1].trim()
+                                    source: valueParts[1].trim(),
+                                    type: valueParts[1].trim(),
                                 });
                             }
                         })
@@ -625,17 +627,40 @@ angular.module('app.debugger', [])
                     if (
                         vm.history[agent].beliefs[previousSequence + ""] !== undefined
                     ) {
-                        vm.history[agent].removedBeliefs[sequence + ""] = _.differenceBy(
-                            vm.history[agent].beliefs[previousSequence + ""],
-                            currentState,
-                            "value"
-                        );
+                        vm.history[agent].removedBeliefs[sequence + ""] =
+                            _.cloneDeep(
+                                _.differenceBy(
+                                    vm.history[agent].beliefs[previousSequence + ""],
+                                    currentState,
+                                    "value"
+                                )
+                            );
+
+
+                        vm.history[agent].removedBeliefs[sequence + ""].forEach(function  (val) {
+                                val.isDeleted = true;
+                        });
                     } else {
                         vm.history[agent].removedBeliefs[sequence + ""] = [];
                     }
 
+                    if (agent === vm.agents.selected) {
+                        updateBeliefBrowser(agent, sequence);
+                    }
                 }
 
+                function updateBeliefBrowser (agent, sequence) {
+                    console.log(agent);
+                    console.log("sq: " + sequence);
+                    console.log(vm.history[agent]);
+                    $scope.$broadcast('belief-base-updated', [
+                        ...(
+                            vm.history[agent].beliefs ? vm.history[agent].beliefs[( sequence + "").trim()] : []
+                        ),
+                        ...(
+                            vm.history[agent].removedBeliefs ? vm.history[agent].removedBeliefs[sequence + ""] : []
+                        )]);
+               }
                 vm.getCurrentBB = function() {
                     if (vm.agents.selected === null) { return []; }
                     let rt = []
@@ -661,6 +686,9 @@ angular.module('app.debugger', [])
                     vm.autoscroll = false;
                     vm.freeze = true;
                     console.log(state);
+                    updateBeliefBrowser(state.AGENT, state.SEQUENCE_NUMBER);
+                    $scope.$apply();
+
                     //showStateBB(state.SEQUENCE_NUMBER + 1);
                 }
 
@@ -723,18 +751,50 @@ angular.module('app.debugger', [])
 
                     onStateReceived({
                         "AGENT": "Alice",
-                        "SEQUENCE_NUMBER": 11,
                         "TYPE": "ACTION",
                         "TYPE_INFO": {
                             "IDENTIFIER": "move(1,0)",
                             VALUES: "",
                             ACTION: undefined
-                        }
+                        },
+                        "TIME_IN_MS": 1610281344629,
+                        "SECONDARY_TIMER": 5,
+                        "SEQUENCE_NUMBER": 5
 
                     });
+                        onStateReceived({
+                            "MAS": "demo_mas",
+                            "TYPE": "SENSE",
+                            "AGENT": "Alice",
+                            "TYPE_INFO": {
+                                "ACTION": "DUMP",
+                                "VALUES": "action_completed(move)|percept;has_cattle|belief"
+                            },
+                            "TIME_IN_MS": 1610281344629,
+                            "SECONDARY_TIMER": 5,
+                            "SEQUENCE_NUMBER": 5
+                        }
+
+
+
+
+                    );
                 }
 
                 vm.mimicPlanTrace =  function () {
+                    onStateReceived(
+                        {
+                            "MAS": "demo_mas",
+                            "TYPE": "SENSE",
+                            "AGENT": "Alice",
+                            "TYPE_INFO": {
+                                "ACTION": "DUMP",
+                                "VALUES": "action_completed(move)|percept;"
+                            },
+                            "TIME_IN_MS": 1610281344629,
+                            "SECONDARY_TIMER": 5,
+                            "SEQUENCE_NUMBER": 6
+                        });
                     onStateReceived({
                         "TYPE": "PLAN_TRACE",
                         "AGENT": "Alice",
@@ -757,8 +817,13 @@ angular.module('app.debugger', [])
                                     ["has_beans", true]
                                 ]
                             }
-                        ]
+                        ],
+                        "TIME_IN_MS": 1610281344629,
+                        "SECONDARY_TIMER": 5,
+                        "SEQUENCE_NUMBER": 6
                     });
+
+
                 }
                 vm.mimicPlanSelection =  function () {
                     onStateReceived({

@@ -10,27 +10,7 @@ angular.module('app.belief_browser', [])
                 vm.searchString = "";
 
                 vm.beliefs = [
-                    {
-                        value: "can_turn_left",
-                        type: "belief",
-                        source: "self"
-                    },
-                    {
-                        value: "has_cat",
-                        type: "message",
-                        source: "Agent Bond"
-                    },
-                    {
-                        value: "had_dog",
 
-                        source: "Instituation a"
-                    },
-                    {
-                        value: "can_turn_left",
-                        isDeleted: true,
-                        type: "norm",
-                        source: "Instituation a"
-                    }
                 ];
                 vm.filteredBeliefs = vm.beliefs;
 
