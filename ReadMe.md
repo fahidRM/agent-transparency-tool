@@ -21,7 +21,7 @@ You may use the pre-built app (see folder: `dist`) or build this repository usin
 #### 3.0. Running &amp; Building
 
 ##### 3.1. Implementation Summary
-- `Language`: `Javascript ES 5`
+- `Language`: `Javascript ES 6`
 - `Framework`: `Angular JS v 1.0`
 - `Platform`: `Node JS`, `electron`
 
@@ -33,7 +33,7 @@ You may use the pre-built app (see folder: `dist`) or build this repository usin
 see `package.json` (no action required)
 
 All other dependencies have been bundled along with the source code. These are:
-`Angular JS v1`, `jQuery v3.2.1`, `lodash v4.0.0` & `Photon Kit`.
+`Angular JS v1`, `d3.js v6.5`, `jQuery v3.2.1`, `lodash v4.0.0` & `Photon Kit`.
 
 
 ##### 3.4. Running project from source code
@@ -59,7 +59,7 @@ All other dependencies have been bundled along with the source code. These are:
 
  `Option 2`: You may choose to use the `electron-packager` to build this project as discussed [on npm](https://www.npmjs.com/package/electron-packager).
 
-`Note`: If you are developing on Windows, we suggest `option 2` as `option 1` includes the use of the `rm` command which may is unavailable on Windows.
+`Note`: If you are developing on Windows, we suggest `option 2` as `option 1` includes the use of the `rm` command which is unavailable on Windows.
 
 #### 4.0. Acknowledgement
 
