@@ -530,6 +530,32 @@ angular.module('app.debugger', [])
                     }
                     return contextPart;
                 }
+                function removeSquareBrackets (contextPart) {
+                    if (contextPart.startsWith("[")  && ! contextPart.endsWith("]")) {
+                        contextPart =  contextPart.substr(1).trim();
+                    } else if (! contextPart.startsWith("[") && contextPart.endsWith("]")) {
+                        contextPart = contextPart.substr(0, contextPart.length -1).trim();
+                    } else if (contextPart.startsWith("[") && contextPart.endsWith("]")) {
+                        contextPart = contextPart.substr(1, contextPart.length - 2).trim();
+                    }
+                    return contextPart;
+                }
+                function placeMissingBracket (contextPart) {
+                    if (contextPart.includes("(")  && ! contextPart.includes(")")) {
+                        return contextPart + ")";
+                    }else  if (contextPart.includes(")")  && ! contextPart.includes("(")) {
+                        return  "(" + contextPart ;
+                    }
+                    return contextPart;
+                }
+
+                function fixEntry (entry) {
+                    entry = removeBrackets(entry);
+                    entry = removeSquareBrackets(entry);
+                    entry =  placeMissingBracket(entry);
+                    return entry;
+                }
+
 
                 function verifyContext (agent, sequence, context) {
                     if (context === undefined || context === "null") { return {
@@ -561,7 +587,7 @@ angular.module('app.debugger', [])
                     let contextParts =  context.split("&");
                     contextParts.forEach((contextPart) => {
                         contextPart = contextPart.trim();
-                        contextPart = removeBrackets(contextPart);
+                        contextPart = removeBrackets(fixEntry(contextPart));
                         const presentableContextPart = (contextPart + "");
                         //alert(presentableContextPart);
 
@@ -570,13 +596,13 @@ angular.module('app.debugger', [])
                         if (contextPart.startsWith("not")){
                             evaluatesIfTrue = false;
                             contextPart =  contextPart.replace("not", "").trim();
-                            contextPart = removeBrackets(contextPart);
+                            contextPart = removeBrackets(fixEntry(contextPart));
                         }
                         // check if it exists in our chunk.....
                         if (double_context[contextPart] !== undefined) {
                             const dcParts =  double_context[contextPart].split("&");
                             dcParts.forEach((dcPart) => {
-                                dcPart = removeBrackets(dcPart);
+                                dcPart = removeBrackets(fixEntry(dcPart));
                                 const partPass = evaluatesIfTrue === hasBelief(
                                     agentBeliefsAtSequence,
                                     dcPart,
@@ -706,15 +732,15 @@ angular.module('app.debugger', [])
                                 targetIndex =  index;
                             }
                         });
+                        // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
+                        vm.history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
+
                         swapBranchNodes(
                             agent,
                             vm.history[agent].branch,
                             Math.floor(vm.history[agent].branch.length / 2),
                             targetIndex
                         )
-
-
-
                     }
                 }
 
@@ -745,9 +771,9 @@ angular.module('app.debugger', [])
                             const valueParts =  (value + "|").split("|");
                             if (valueParts[0].trim().length > 0){
                                 currentState.push({
-                                    value: valueParts[0].trim(),
-                                    source: valueParts[1].trim(),
-                                    type: valueParts[1].trim(),
+                                    value: fixEntry(valueParts[0].trim()),
+                                    source: fixEntry(valueParts[1].trim()),
+                                    type: fixEntry(valueParts[1].trim())
                                 });
                             }
                         })
@@ -916,7 +942,6 @@ angular.module('app.debugger', [])
 
                     );
                 }
-
                 vm.mimicPlanTrace =  function () {
                     onStateReceived(
                         {
