@@ -4,14 +4,15 @@
   "description": "Graphical debugger for Multi-Agent Systems....",
   "main": "main.js",
   "scripts": {
-    "build-all": "npm run delete-all-builds && electron-packager . mas-graphical-debugger --platform=all --arch=all",
-    "build-lin": "npm run delete-lin-build && electron-packager . mas-graphical-debugger --platform=linux --arch=all",
-    "build-mac": "npm run delete-mac-build && electron-packager . mas-graphical-debugger --platform=darwin --arch=all",
-    "build-win": "npm run delete-win-build && electron-packager . mas-graphical-debugger --platform=win32 --arch=all",
+    "build-all": "npm run delete-all-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=all --arch=all",
+    "build-lin": "npm run delete-lin-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=linux --arch=all",
+    "build-mac": "npm run delete-mac-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=darwin --arch=all",
+    "build-win": "npm run delete-win-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=win32 --arch=all",
     "delete-all-build": "rm -r ./mas-graphical-debugger* || true",
     "delete-lin-build": "rm -r ./mas-graphical-debugger-linux* || true",
     "delete-mac-build": "rm  -r ./mas-graphical-debugger-darwin* || true",
     "delete-win-build": "rm  -r ./mas-graphical-debugger-win32* || true",
+    "remove-dist": "rm -r ./dist || true",
     "start": "electron main.js"
   },
   "keywords": [
