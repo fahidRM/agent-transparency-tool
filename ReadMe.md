@@ -8,7 +8,7 @@ Visual Debugging Tool for Multi-Agent Systems.
 
 #### 1.0. Installation
 
-You may use the pre-built app (see folder: `dist`) or build this repository using the guide below (see section: `Running & Building`).
+You may use the pre-built app (see [release tab](https://github.com/fahidRM/agent-debugger/releases)) or build this repository using the guide below (see section: `Running & Building`).
 
 #### 2.0. How to use
 
