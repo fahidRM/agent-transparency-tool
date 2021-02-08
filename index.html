@@ -5,7 +5,10 @@
         <link href="assets/css/photon.min.css" rel="stylesheet" />
         <link href="assets/css/app.css" rel="stylesheet" />
     </head>
-    <body ng-app = "graphical-debugger" ng-controller = "DebuggerController as debugger"  class="animsition" ng-init="debugger.initialise()">
+    <body class="animsition"
+          ng-app = "graphical-debugger"
+          ng-controller = "DebuggerController as debugger"
+          ng-init="debugger.initialise()">
     <div class="window">
         <div class="window-content">
             <div class="pane-group">
@@ -58,7 +61,8 @@
         </div>
         <footer class="toolbar toolbar-footer">
             <div class="toolbar-actions">
-                <button class="btn btn-default pull0left">
+                <button class="btn btn-default pull0left"
+                        ng-click="debugger.showSettingsPage()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;Settings
                 </button>
@@ -88,10 +92,21 @@
                         ng-click="debugger.toggleAutoscroll()">
                     {{debugger.autoscroll? 'Disable Autoscroll' : 'Enable Autoscroll'}}
                 </button>
+
+                <button class="btn  pull-right btn-default"
+                        ng-class="{'btn-negative' : ! debugger.isRunning , 'disabled' : debugger.isRunning}"
+                        ng-hide="debugger.isRunning || debugger.agents.all.length === 0"
+                        ng-click="debugger.reset()">
+                    Reset
+                </button>
+
+
+
             </div>
         </footer>
     </div>
     </body>
+
     <!-- angular templates -->
     <script type="text/ng-template" id="belief_browser.html">
         <nav class="nav-group" ng-controller="BeliefBrowserController as bb">
@@ -130,4 +145,5 @@
     <script src="assets/js/app.js"></script>
     <script src="assets/js/components/belief_browser.js"></script>
     <script src="assets/js/components/debugger.js"></script>
+    <script src="assets/js/components/settings.js"></script>
 </html>

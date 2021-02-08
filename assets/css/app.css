@@ -97,3 +97,8 @@ div.tooltip {
 .info-bar {
     border-bottom: 1px solid black;
 }
+
+.enlarged-node {
+    width: 200px !important;
+    height: 200px !important;
+}

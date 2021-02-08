@@ -3,8 +3,14 @@ angular.module('app.debugger', [])
     .controller(
         'DebuggerController',
         [
-            '$scope',
-            function ($scope) {
+            '$scope', 'SettingsManager',
+            function ($scope, settings) {
+
+                const app = require('express')();               // required for server...
+                const bodyParser = require('body-parser');      // required for parsing JSON payloads...
+                const http = require('http').createServer(app); // required for server...
+                const ipcRenderer = require('electron').ipcRenderer; // required for settigns page loadeing
+
 
                 const DEFAULTS = {
                     colours: {
@@ -40,11 +46,6 @@ angular.module('app.debugger', [])
                     history: {},
                 }
 
-                const app = require('express')();               // required for server...
-                const bodyParser = require('body-parser');      // required for parsing JSON payloads...
-                const http = require('http').createServer(app); // required for server...
-
-
                 let vm = this;          // view model
                 vm.agents = {...INITIAL_STATE.agents};
                 vm.autoscroll = true;
@@ -52,6 +53,7 @@ angular.module('app.debugger', [])
                 vm.isRunning = false;   //debugger status
                 vm.selectedAgent = "";
 
+                let nodeInformationPreference = {};
 
                 /** D3 lets **/
                 $scope.currentSequence = 0;
@@ -76,7 +78,60 @@ angular.module('app.debugger', [])
                  */
                 vm.initialise = function (agent) {
                     setupRestApi();
+                    loadSettings();
                     setupVisualisationBoard(agent);
+                }
+
+                vm.showSettingsPage = function() {
+                    ipcRenderer.send('launch-settings-page', {});
+                }
+
+
+                function getFirstDoubleWrappedExpression (phrase) {
+                    let startPoint = -1;
+                    let endPoint = -1;
+
+                    for (let i = 1; i <phrase.length; i++) {
+                         if ((phrase[i-1] === "(")  && (phrase[i] === "(")) {
+                             startPoint = i + 1;
+                         } else if ((phrase[i+1] === ")" ) && ( phrase[i] === ")")) {
+                             endPoint = i-1;
+                             break;
+                         }
+                    }
+
+                    if (startPoint === -1 || endPoint === -1) {
+                        return undefined;
+                    } else {
+                        return  {
+                            "enclosed_expression": phrase.substr(startPoint-2, (endPoint-startPoint) + 5),
+                            "expression": phrase.substr(startPoint, (endPoint-startPoint) + 1),
+                        }
+                    }
+
+                }
+
+
+                function loadSettings () {
+                    settings.get('NODE_META').then((value) => {
+                        nodeInformationPreference = value;
+                        if (nodeInformationPreference === undefined) {
+                            settings.createOrUpdate('NODE_META', {});
+                        }
+                    })
+
+                }
+
+                vm.reset = function () {
+                    const vBoard = angular.element(document.querySelector("#visualisation_board"));
+                    vBoard.empty();
+                    vm.agents = {...INITIAL_STATE.agents};
+                    vm.autoscroll = true;
+                    vm.history = {...INITIAL_STATE.history};
+                    vm.isRunning = false;   //debugger status
+                    vm.selectedAgent = "";
+                    $scope.$broadcast('belief-base-reset',null);
+                    vm.initialise();
                 }
 
                 /**
@@ -121,7 +176,7 @@ angular.module('app.debugger', [])
                         // inform client that request has been received
                         res.send();
                         // handle request
-                        onStateReceived(req.body);
+                        onStateReceived(req.body.log || {});
                     });
                 }
 
@@ -154,6 +209,7 @@ angular.module('app.debugger', [])
 
                 /**
                  * start
+                 *
                  * Starts the debug server....
                  */
                 function start() {
@@ -165,6 +221,7 @@ angular.module('app.debugger', [])
 
                 /**
                  * stop
+                 *
                  * Stops the debug server...
                  */
                 function stop() {
@@ -199,6 +256,7 @@ angular.module('app.debugger', [])
                     // mutate the object.....
                     state.TYPE_INFO.SEQUENCE_NUMBER =  state.SEQUENCE_NUMBER;
                     state.TYPE_INFO.AGENT = state.AGENT;
+                    state.TYPE_INFO.TYPE = state.TYPE;
 
                     switch (state.TYPE) {
                         case DEFAULTS.states.action:
@@ -228,18 +286,32 @@ angular.module('app.debugger', [])
 
                 }
 
-                function updateChart (ag) {
-                    root  = vm.history[ag].activities;
+                /**
+                 * updateChart
+                 * Updates the chart
+                 *
+                 * @param agent Agent's we want to visualise
+                 */
+                function updateChart (agent) {
+                    root  = vm.history[agent].activities;
                     updateVisualisation(root);
                 }
 
-                function getNodeColour (d) {
+
+                /**
+                 * getNodeColour
+                 * Inspect a node and decide what colour it should be
+                 *
+                 * @param node          Visualisation (Graph) node
+                 * @returns {string}    Colour as text or hex
+                 */
+                function getNodeColour (node) {
                     let nodeColour;
-                    if (d["FAILURE_REASON"] !== undefined) {
+                    if (node["FAILURE_REASON"] !== undefined) {
                         nodeColour = DEFAULTS.colours.failureNode;
                     }
-                    else if (d.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
-                    else if ((d.CONTEXT_PASSED === undefined) || (d.CONTEXT_PASSED)) {
+                    else if (node.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
+                    else if ((node.CONTEXT_PASSED === undefined) || (node.CONTEXT_PASSED)) {
                         nodeColour = DEFAULTS.colours.traversableNode
                     }
                     else {
@@ -247,6 +319,7 @@ angular.module('app.debugger', [])
                     }
                     return nodeColour;
                 }
+
 
                 function updateVisualisation (source) {
                     // Compute the new tree layout.
@@ -266,7 +339,9 @@ angular.module('app.debugger', [])
 
 
                     // Normalize for fixed-depth.
-                    nodes.forEach(function(d) { d.y = d.depth * 180; });
+                    nodes.forEach(function(d) {
+                        d.y = d.depth * 180;
+                    });
 
                     // Update the nodes…
                     let node = svg.selectAll("g.node").data(
@@ -376,7 +451,6 @@ angular.module('app.debugger', [])
                         })
                         .remove();
 
-                    // Stash the old positions for transition.
 
 
                     let visualisationBoardContainer = document.getElementById("view_region");
@@ -389,6 +463,9 @@ angular.module('app.debugger', [])
                         lastNodePosition = lastNodePosition < d.y ? d.y : lastNodePosition;
                         d.x0 = d.x;
                         d.y0 = d.y;
+
+
+
                     });
 
                     if (vm.autoscroll) {
@@ -399,7 +476,12 @@ angular.module('app.debugger', [])
                 }
 
 
-
+                /**
+                 * logAction
+                 * Log an Agent's action
+                 *
+                 * @param stateLog  log of the gent's state
+                 */
                 function logAction (stateLog) {
                     const state = stateLog.TYPE_INFO;
                     const agent = stateLog.AGENT;
@@ -417,7 +499,7 @@ angular.module('app.debugger', [])
                     const agent = stateLog.AGENT;
                     let visibleIndex = 0;
                     if ((state.length % 2) === 0) {
-                        state.unshift(DEFAULTS.invisibleNode);
+                        state.unshift({...DEFAULTS.invisibleNode});
                         visibleIndex = 1;
                     }
                     state.forEach(function (entry) {
@@ -429,50 +511,107 @@ angular.module('app.debugger', [])
                     vm.history[agent].current["children"] = state;
                     vm.history[agent].last = vm.history[agent].current;
                     vm.history[agent].current = state[visibleIndex];
+
+
+                    vm.history[agent].branch.forEach(function (trace) {
+                        const val = verifyContext(agent, state.SEQUENCE_NUMBER, trace.CONTEXT);
+                        trace.CONTEXT_PASSED = val.CONTEXT_PASSED;
+                        trace.CONTEXT_META = val.CONTEXT_META;
+                    });
                 }
 
+                function removeBrackets (contextPart) {
+                    if (contextPart.startsWith("(")  && ! contextPart.endsWith(")")) {
+                        contextPart =  contextPart.substr(1).trim();
+                    } else if (! contextPart.startsWith("(") && contextPart.endsWith(")")) {
+                        contextPart = contextPart.substr(0, contextPart.length -1).trim();
+                    } else if (contextPart.startsWith("(") && contextPart.endsWith(")")) {
+                        contextPart = contextPart.substr(1, contextPart.length - 2).trim();
+                    }
+                    return contextPart;
+                }
 
-
-                function verifyContext (agent, sequence, contextString) {
-                    if (contextString === undefined || contextString === null) { contextString = "-"; }
-                    contextString = contextString.trim();
-                    if (contextString === "-") { return {
+                function verifyContext (agent, sequence, context) {
+                    if (context === undefined || context === "null") { return {
                         CONTEXT_PASSED: true,
                         CONTEXT_META: [ ["None", true]]
                     } }
-                    else {
-
-                        const trimmedContext =  contextString.trim().replace(" ", "");
-                        if (trimmedContext.indexOf("&") > -1) {
-                            const trimmedContextParts = trimmedContext.split("&");
-                            let extract = [];
-
-                            trimmedContextParts.forEach(function (trimmedContextPart) {
-                                if (trimmedContextPart.startsWith("(")) { trimmedContextPart = trimmedContextPart.substring(1); }
-                                if (
-                                    (trimmedContextPart.endsWith(")") &&  (trimmedContextPart.indexOf("(") === -1) ) ||
-                                    (trimmedContextPart.endsWith(")") && (trimmedContextPart.indexOf("(") !== trimmedContextPart.lastIndexOf("("))) ||
-                                    (trimmedContextPart.endsWith(")") && (trimmedContextPart.indexOf(")") !== trimmedContextPart.lastIndexOf(")")) && (trimmedContextPart.indexOf("(") === trimmedContextPart.lastIndexOf("(")))
-                                ){
-                                    trimmedContextPart = trimmedContextPart.substr(0, trimmedContextPart.length - 1);
-                                }
-
-                                const finalCotext = trimmedContextPart.trim();
-                                extract.push(finalCotext);
-                            });
-                            return getContextSummary(agent, sequence, extract);
-
-                            /* return {
-                                 CONTEXT_PASSED: allPassed,
-                                 CONTEXT_META: extract
-                             };*/
-                        } else {
-                            return getContextSummary(agent, sequence, [trimmedContext]);
-                        }
+                    const agentBeliefsAtSequence =  vm.history[agent].beliefs[sequence];
+                    let double_context = {};
+                    let double_context_counter = 0;
+                    // remove external wrapping
+                    context = context.replace(" ", "");
+                    if (context.startsWith("(") && context.endsWith(")")){
+                        context = context.substr(1, context.length - 2);
                     }
+                    while (getFirstDoubleWrappedExpression(context) !== undefined) {
+                        //create other dump
+                        let expression =  getFirstDoubleWrappedExpression(context);
+                        double_context["p" + double_context_counter] = expression['expression']
+                        context = context.replace(
+                            expression['enclosed_expression'], ' p' + double_context_counter
+                        );
+                        double_context_counter ++;
+                    }
+
+                    let evaluationSummary = [];
+                    let evalPass = true;
+
+                    // split all
+                    let contextParts =  context.split("&");
+                    contextParts.forEach((contextPart) => {
+                        contextPart = contextPart.trim();
+                        contextPart = removeBrackets(contextPart);
+                        const presentableContextPart = (contextPart + "");
+                        //alert(presentableContextPart);
+
+                        let evaluatesIfTrue = true;
+
+                        if (contextPart.startsWith("not")){
+                            evaluatesIfTrue = false;
+                            contextPart =  contextPart.replace("not", "").trim();
+                            contextPart = removeBrackets(contextPart);
+                        }
+                        // check if it exists in our chunk.....
+                        if (double_context[contextPart] !== undefined) {
+                            const dcParts =  double_context[contextPart].split("&");
+                            dcParts.forEach((dcPart) => {
+                                dcPart = removeBrackets(dcPart);
+                                const partPass = evaluatesIfTrue === hasBelief(
+                                    agentBeliefsAtSequence,
+                                    dcPart,
+                                    contextPart.indexOf("_") > -1)
+                                evalPass = evalPass & partPass;
+
+                                evaluationSummary.push([
+                                    evaluatesIfTrue ? dcPart : "not " +  dcPart,
+                                    partPass
+                                ])
+                            })
+
+
+
+                        }
+                        else {
+                            contextPart = removeBrackets(contextPart);
+                            const partPass = evaluatesIfTrue === hasBelief(
+                                agentBeliefsAtSequence,
+                                contextPart,
+                                contextPart.indexOf("_") > -1)
+                            evalPass = evalPass && partPass;
+
+                            evaluationSummary.push([
+                                evaluatesIfTrue ? contextPart : "not " +  contextPart,
+                                partPass
+                            ])
+                        }
+                    })
+                    return {
+                        CONTEXT_PASSED: evalPass,
+                        CONTEXT_META: evaluationSummary
+                    };
+
                 }
-
-
 
                 function getContextSummary (agent, sequence, contextList) {
                     const agentBeliefsAtSequence =  vm.history[agent].beliefs[sequence];
@@ -558,8 +697,8 @@ angular.module('app.debugger', [])
                         let targetIndex = 0;
                         vm.history[agent].branch.forEach(function(item, index) {
                             if (
-                                (item.IDENTIFIER === state.IDENTIFIER)
-                                &&
+                                /*(item.IDENTIFIER === state.IDENTIFIER)
+                                &&*/
                                 (item["CODE_LINE"] === state["CODE_LINE"])
                                 &&
                                 (item["CODE_FILE"] === state["CODE_FILE"])
@@ -574,11 +713,7 @@ angular.module('app.debugger', [])
                             targetIndex
                         )
 
-                        vm.history[agent].branch.forEach(function (trace) {
-                            const val = verifyContext(agent, state.SEQUENCE_NUMBER, trace.CONTEXT);
-                            trace.CONTEXT_PASSED = val.CONTEXT_PASSED;
-                            trace.CONTEXT_META = val.CONTEXT_META;
-                        });
+
 
                     }
                 }
@@ -619,7 +754,7 @@ angular.module('app.debugger', [])
                     }
 
 
-                    vm.history[agent].beliefs[( sequence + "").trim()] = currentState;
+                    vm.history[agent].beliefs[( sequence + "").trim()] = _.uniqWith(currentState, _.isEqual);
                     vm.history[agent].removedBeliefs[(sequence + "").trim()] = [];
 
 
@@ -628,12 +763,15 @@ angular.module('app.debugger', [])
                         vm.history[agent].beliefs[previousSequence + ""] !== undefined
                     ) {
                         vm.history[agent].removedBeliefs[sequence + ""] =
-                            _.cloneDeep(
-                                _.differenceBy(
-                                    vm.history[agent].beliefs[previousSequence + ""],
-                                    currentState,
-                                    "value"
-                                )
+                            _.uniqWith(
+                                _.cloneDeep(
+                                    _.differenceBy(
+                                        vm.history[agent].beliefs[previousSequence + ""],
+                                        currentState,
+                                        "value"
+                                    )
+                                ),
+                                _.isEqual
                             );
 
 
@@ -646,13 +784,11 @@ angular.module('app.debugger', [])
 
                     if (agent === vm.agents.selected) {
                         updateBeliefBrowser(agent, sequence);
+                        $scope.$apply();
                     }
                 }
 
                 function updateBeliefBrowser (agent, sequence) {
-                    console.log(agent);
-                    console.log("sq: " + sequence);
-                    console.log(vm.history[agent]);
                     $scope.$broadcast('belief-base-updated', [
                         ...(
                             vm.history[agent].beliefs ? vm.history[agent].beliefs[( sequence + "").trim()] : []
@@ -685,11 +821,8 @@ angular.module('app.debugger', [])
                 function selectState (state) {
                     vm.autoscroll = false;
                     vm.freeze = true;
-                    console.log(state);
                     updateBeliefBrowser(state.AGENT, state.SEQUENCE_NUMBER);
                     $scope.$apply();
-
-                    //showStateBB(state.SEQUENCE_NUMBER + 1);
                 }
 
                 function mouseover() {
@@ -714,6 +847,9 @@ angular.module('app.debugger', [])
 
 
                     if (d.CONTEXT_META !== undefined) {
+
+
+
                         div.append("br")
                         div.append("br")
                         div.append("b").text("context:");

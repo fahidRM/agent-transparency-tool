@@ -6,7 +6,7 @@ angular.module('app.belief_browser', [])
             function ($scope) {
                 // list of recognised knowledge types....
                 const recognisedTypes = ["belief", "message", "norm", "percept", "sensor", "value"];
-                var vm = this;
+                let vm = this;
                 vm.searchString = "";
 
                 vm.beliefs = [
@@ -31,7 +31,7 @@ angular.module('app.belief_browser', [])
                  *
                  */
                 vm.search = function () {
-                    if (vm.searchString.length == 0) {
+                    if (vm.searchString.length === 0) {
                         vm.filteredBeliefs =  vm.beliefs;
                     } else {
                         vm.filteredBeliefs = _.filter(
@@ -47,9 +47,13 @@ angular.module('app.belief_browser', [])
                  *
                  */
                 $scope.$on('belief-base-updated', function (event, update) {
-                    console.log(update);
                    vm.beliefs =  update;
                    vm.search();
+                });
+
+                $scope.$on('belief-base-reset', function (event) {
+                    vm.beliefs =  [];
+                    vm.search();
                 });
             }
         ]
