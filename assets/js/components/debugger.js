@@ -213,8 +213,8 @@ angular.module('app.debugger', [])
                  * Starts the debug server....
                  */
                 function start() {
-                    http.listen(3000, () => {
-                        console.log("Listening on 3000...");
+                    http.listen(3700, () => {
+                        console.log("Listening on 3700...");
                         $scope.isRunning = true;
                     });
                 }
@@ -237,6 +237,7 @@ angular.module('app.debugger', [])
                  * @param state Agent state object
                  */
                 function onStateReceived (state) {
+                    console.log(state);
                     // drop invalid logs...
                     if (state.TYPE_INFO === undefined) { return; }
                     // identify agent
@@ -508,8 +509,12 @@ angular.module('app.debugger', [])
                     });
 
                     vm.history[agent].branch = state;
-                    vm.history[agent].current["children"] = state;
-                    vm.history[agent].last = vm.history[agent].current;
+                    if ((vm.history[agent].current !== undefined) &&
+                        (vm.history[agent].current !== null)){
+                        vm.history[agent].current["children"] = state;
+                        vm.history[agent].last = vm.history[agent].current;
+                    }
+
                     vm.history[agent].current = state[visibleIndex];
 
 
@@ -723,18 +728,21 @@ angular.module('app.debugger', [])
                         let targetIndex = 0;
                         vm.history[agent].branch.forEach(function(item, index) {
                             if (
-                                /*(item.IDENTIFIER === state.IDENTIFIER)
-                                &&*/
+                                (item.IDENTIFIER === state.IDENTIFIER)
+                                &&
                                 (item["CODE_LINE"] === state["CODE_LINE"])
                                 &&
                                 (item["CODE_FILE"] === state["CODE_FILE"])
+                                &&
+                                (item["CONTEXT_PASSED"] === true)
+
                             ){
                                 targetIndex =  index;
                             }
                         });
                         // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
                         vm.history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
-
+                        console.log("swapping....");
                         swapBranchNodes(
                             agent,
                             vm.history[agent].branch,
@@ -773,7 +781,7 @@ angular.module('app.debugger', [])
                                 currentState.push({
                                     value: fixEntry(valueParts[0].trim()),
                                     source: fixEntry(valueParts[1].trim()),
-                                    type: fixEntry(valueParts[1].trim())
+                                    type: fixEntry(valueParts[2].trim())
                                 });
                             }
                         })
@@ -815,13 +823,17 @@ angular.module('app.debugger', [])
                 }
 
                 function updateBeliefBrowser (agent, sequence) {
+
+
+                    console.log("Agent: " + agent);
+                    console.log("Sequence: " + sequence);
+                    console.log(vm.history);
+
+                    let a1 = vm.history[agent].beliefs ? vm.history[agent].beliefs[( sequence + "").trim()] : []
+                    let a2 = vm.history[agent].removedBeliefs ? vm.history[agent].removedBeliefs[sequence + ""] : []
                     $scope.$broadcast('belief-base-updated', [
-                        ...(
-                            vm.history[agent].beliefs ? vm.history[agent].beliefs[( sequence + "").trim()] : []
-                        ),
-                        ...(
-                            vm.history[agent].removedBeliefs ? vm.history[agent].removedBeliefs[sequence + ""] : []
-                        )]);
+                        ...a1,
+                        ...a2]);
                }
                 vm.getCurrentBB = function() {
                     if (vm.agents.selected === null) { return []; }
