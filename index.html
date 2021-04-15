@@ -1,14 +1,14 @@
 <! doctype html>
 <html>
     <head>
-        <title>Agent Debugger</title>
+        <title>Agent dashboard</title>
         <link href="assets/css/photon.min.css" rel="stylesheet" />
         <link href="assets/css/app.css" rel="stylesheet" />
     </head>
     <body class="animsition"
-          ng-app = "graphical-debugger"
-          ng-controller = "DebuggerController as debugger"
-          ng-init="debugger.initialise()">
+          ng-app = "agent-transparency-tool"
+          ng-controller = "DashboardController as dashboard"
+          ng-init="dashboard.initialise()">
     <div class="window">
         <div class="window-content">
             <div class="pane-group">
@@ -44,13 +44,13 @@
                                 <span class="icon icon-user dropbtn" ></span>
                                 <div class="dropdown-content">
                                     <a href="#"
-                                       ng-click="debugger.selectAgent(agent)"
-                                       ng-repeat="agent in debugger.agents.all">
+                                       ng-click="dashboard.selectAgent(agent)"
+                                       ng-repeat="agent in dashboard.agents.all">
                                         {{agent}}
                                     </a>
                                 </div>
                             </button>
-                            <span class="pull-right"><b>Visualising: {{debugger.agents.selected}} &nbsp;&nbsp;</b></span>
+                            <span class="pull-right"><b>Visualising: {{dashboard.agents.selected}} &nbsp;&nbsp;</b></span>
                         </div>
 
 
@@ -64,41 +64,41 @@
         <footer class="toolbar toolbar-footer">
             <div class="toolbar-actions">
                 <button class="btn btn-default pull0left"
-                        ng-click="debugger.showSettingsPage()">
+                        ng-click="dashboard.showSettingsPage()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;Settings
                 </button>
 
-                <!--button class="btn btn-default pull0left" ng-click="debugger.mimicAction()">
+                <!--button class="btn btn-default pull0left" ng-click="dashboard.mimicAction()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;a
                 </button>
 
-                <button class="btn btn-default pull0left" ng-click="debugger.mimicPlanTrace()">
+                <button class="btn btn-default pull0left" ng-click="dashboard.mimicPlanTrace()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;pt
                 </button>
 
-                <button class="btn btn-default pull0left" ng-click="debugger.mimicPlanSelection()">
+                <button class="btn btn-default pull0left" ng-click="dashboard.mimicPlanSelection()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;ps
                 </button-->
 
                 <button class="btn  pull-right"
-                    ng-class="{'btn-negative' : debugger.isRunning , 'btn-primary' : ! debugger.isRunning}"
-                    ng-click="debugger.toggleDebugging()">
-                    {{debugger.isRunning ? 'Stop Debugger' : 'Start Debugger'}}
+                    ng-class="{'btn-negative' : dashboard.serverIsRunning , 'btn-primary' : ! dashboard.serverIsRunning}"
+                    ng-click="dashboard.toggleServer()">
+                    {{dashboard.serverIsRunning ? 'Stop dashboard' : 'Start dashboard'}}
                 </button>
 
                 <button class="btn  pull-right btn-default"
-                        ng-click="debugger.toggleAutoscroll()">
-                    {{debugger.autoscroll? 'Disable Autoscroll' : 'Enable Autoscroll'}}
+                        ng-click="dashboard.toggleAutoscroll()">
+                    {{dashboard.autoscroll? 'Disable Autoscroll' : 'Enable Autoscroll'}}
                 </button>
 
                 <button class="btn  pull-right btn-default"
-                        ng-class="{'btn-negative' : ! debugger.isRunning , 'disabled' : debugger.isRunning}"
-                        ng-hide="debugger.isRunning || debugger.agents.all.length === 0"
-                        ng-click="debugger.reset()">
+                        ng-class="{'btn-negative' : ! dashboard.serverIsRunning , 'disabled' : dashboard.serverIsRunning}"
+                        ng-hide="dashboard.serverIsRunning || dashboard.agents.all.length === 0"
+                        ng-click="dashboard.reset()">
                     Reset
                 </button>
 
@@ -184,8 +184,9 @@
     <!-- app -->
     <script src="assets/js/app.js"></script>
     <script src="assets/js/components/belief_browser.js"></script>
-    <script src="assets/js/components/debugger.js"></script>
     <script src="assets/js/components/preferences.js"></script>
+    <script src="assets/js/components/server.js"></script>
     <script src="assets/js/components/settings.js"></script>
+    <script src="assets/js/components/transparency-dashboard.js"></script>
     <script src="assets/js/components/visualisation-builder.js"></script>
 </html>

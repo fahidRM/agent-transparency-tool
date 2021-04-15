@@ -1,9 +1,10 @@
 
-const singlePageApplication = angular.module("graphical-debugger", [
-    'app.belief_browser',
-    'app.data',
-    'app.debugger',
-    'app.preferences',
-    'app.settings',
+const singlePageApplication = angular.module("agent-transparency-tool", [
+    'app.belief_browser',               // belief base
+    'app.data',                         // visualisation module
+    'app.preferences',                  // visualisation preference controller
+    'app.server',                       // the server (express js server)
+    'app.settings',                     // settings controller
+    'app.transparency_dashboard',       // the main page controller
 ]);
 
