@@ -31,6 +31,8 @@
                         </span>
                     </nav>
                     <br><br>
+
+                    <nav ng-include src="'preference_browser.html'"></nav>
                     <nav ng-include src="'belief_browser.html'"></nav>
                 </div>
 
@@ -124,12 +126,50 @@
                          width="32" height="32">
                     <div class="media-body">
                         <strong>{{belief.value}}</strong>
-                        <p>{{belief.source}}</p>
+                        <p>{{belief.source}}<br><i>{{belief.type}}</i></p>
                     </div>
                 </li>
             </ul>
         </nav>
     </script>
+
+    <script type="text/ng-template" id="preference_browser.html">
+        <nav class="nav-group" ng-controller="ViewPreferenceController as viewPreference">
+            <h5 class="nav-group-title">View Preferences</h5>
+            <ul class="list-group">
+                <li class="list-group-header">
+                    <select class="form-control"
+                            ng-change="viewPreference.setSelectionIndex($index)"
+                            ng-model="viewPreference.selectedLogType"
+                            ng-options="logType.name for logType in viewPreference.logTypes">
+
+                    </select>
+                </li>
+                <li class="list-group-item" >
+                    <div class="checkbox" ng-repeat="prop in viewPreference.selectedLogType.props ">
+                        <label>
+                            <input type="checkbox"
+                                   ng-click="viewPreference.togglePropVisibility($index)"
+                                   checked="{{prop.visible === true}}"> {{prop.name}}
+                        </label>
+                    </div>
+                    <br>
+                    <br>
+                    <button type="submit"
+                            ng-show="viewPreference.selectedLogType !== null"
+                            class="btn btn-form btn-default">Cancel</button>
+                    <button type="submit"
+                            class="btn btn-form btn-primary"
+                            ng-show="viewPreference.selectedLogType !== null"
+                            ng-click="viewPreference.onViewPreferenceUpdated(null, null)"
+                    >Update</button>
+                </li>
+               <br><br>
+            </ul>
+        </nav>
+    </script>
+
+
 
 
     <!-- dependencies -->
@@ -145,5 +185,7 @@
     <script src="assets/js/app.js"></script>
     <script src="assets/js/components/belief_browser.js"></script>
     <script src="assets/js/components/debugger.js"></script>
+    <script src="assets/js/components/preferences.js"></script>
     <script src="assets/js/components/settings.js"></script>
+    <script src="assets/js/components/visualisation-builder.js"></script>
 </html>

@@ -1,8 +1,9 @@
 angular.module('app.settings', [])
     .service('SettingsManager', [function () {
 
-        const settings = require('electron-settings');
 
+
+        const settings = require('electron-settings');
 
         this.createOrUpdate =  function (property, value) {
             let $promise = settings.set(property, value);
@@ -22,6 +23,10 @@ angular.module('app.settings', [])
                 return value;
             })
         }
+
+
+
+
 
 
 

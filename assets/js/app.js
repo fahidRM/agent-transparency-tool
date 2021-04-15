@@ -1,7 +1,9 @@
 
 const singlePageApplication = angular.module("graphical-debugger", [
     'app.belief_browser',
+    'app.data',
     'app.debugger',
-    'app.settings'
+    'app.preferences',
+    'app.settings',
 ]);
 

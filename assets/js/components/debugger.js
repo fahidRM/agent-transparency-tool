@@ -3,8 +3,25 @@ angular.module('app.debugger', [])
     .controller(
         'DebuggerController',
         [
-            '$scope', 'SettingsManager',
-            function ($scope, settings) {
+            '$scope', '$rootScope', 'SettingsManager', 'VisualisationService',
+            function ($scope, $rootScope, settings, visualisation) {
+
+
+                /**
+                 *
+                 * NOTE to self:
+                 *  - filter out nodes based on view pref
+                 *  - single point of filtering.....
+                 *  -   process should only happen once....
+                 *
+                 *
+                 *
+                 * @type {*|Express}
+                 */
+
+                visualisation({"owner": "b", "data": "12345"}, null);
+                console.log("Visualisation Builder: ");
+                console.log( visualisation(null, "b"));
 
                 const app = require('express')();               // required for server...
                 const bodyParser = require('body-parser');      // required for parsing JSON payloads...
@@ -53,7 +70,9 @@ angular.module('app.debugger', [])
                 vm.isRunning = false;   //debugger status
                 vm.selectedAgent = "";
 
+                let viewPrefs = {};
                 let nodeInformationPreference = {};
+                let nodeHtml = {};
 
                 /** D3 lets **/
                 $scope.currentSequence = 0;
@@ -206,6 +225,17 @@ angular.module('app.debugger', [])
                     root.y0 = 0;
                     updateVisualisation(root);
                 }
+
+
+                $rootScope.$on('updated-view-preference', function (event, updatedViewPreference) {
+                   console.log("Got this new view preference: ");
+                   console.log(updatedViewPreference);
+                   let vpName =  updatedViewPreference.name;
+                   let vpPrefs =  updatedViewPreference.props;
+                   viewPrefs[vpName] = vpPrefs;
+
+                });
+
 
                 /**
                  * start
@@ -561,8 +591,47 @@ angular.module('app.debugger', [])
                     return entry;
                 }
 
-
                 function verifyContext (agent, sequence, context) {
+                    // for this to work we need the or relation maintained....
+                    // default is and
+                    // or should be lfs or rhs
+                    if (context === undefined || context === "null" || context.length === 0) { return {
+                        CONTEXT_PASSED: true,
+                        CONTEXT_META: [ ["None", true]]
+                    } }
+
+                    const agentBeliefsAtSequence =  vm.history[agent].beliefs[sequence];
+                    let evaluationSummary = [];
+                    let evalPass = true;
+
+                    context.forEach((contextElement) => {
+                        contextElement = contextElement.trim();
+                        let evaluatesIfTrue = ! contextElement.startsWith("not");
+                        if (! evaluatesIfTrue) { contextElement = contextElement.replace("not", "").trim(); }
+
+                        const partPass = evaluatesIfTrue === hasBelief(
+                            agentBeliefsAtSequence,
+                            contextElement,
+                            contextElement.indexOf("_") > -1)
+
+                        evalPass = evalPass && partPass;
+
+                        evaluationSummary.push([
+                            evaluatesIfTrue ? contextElement : "not " +  contextElement,
+                            partPass
+                        ])
+
+                    })
+
+                    return {
+                        CONTEXT_PASSED: evalPass,
+                        CONTEXT_META: evaluationSummary
+                    };
+
+                }
+
+
+                function verifyContextOld (agent, sequence, context) {
                     if (context === undefined || context === "null") { return {
                         CONTEXT_PASSED: true,
                         CONTEXT_META: [ ["None", true]]
@@ -734,7 +803,8 @@ angular.module('app.debugger', [])
                                 &&
                                 (item["CODE_FILE"] === state["CODE_FILE"])
                                 &&
-                                (item["CONTEXT_PASSED"] === true)
+                                //(item["CONTEXT_PASSED"] === true)
+                                (item["CONTEXT"] === state["CONTEXT"])
 
                             ){
                                 targetIndex =  index;
@@ -869,19 +939,42 @@ angular.module('app.debugger', [])
                         .style("opacity", 1);
                 }
 
+                function sentencify (word) {
+                    return word.toLowerCase().replace("_", " ");
+                }
                 function mousemove(d) {
                     div.text("")
                         .style("left", (d3.event.pageX ) + "px")
                         .style("top", (d3.event.pageY) + "px");
                     div.append("b").text(d.IDENTIFIER);
 
-                    if (d["CODE_FILE"] !== undefined) {
+                    // TODO: FIX
+                    let opts = viewPrefs[d["TYPE"]];
+                    console.log('view prefs', viewPrefs);
+                    console.log("opt", opts);
+                    console.log('type:', d["TYPE"]);
+                    if (opts !== undefined) {
+                        // filter for the true one....
                         div.append("br");
-                        div.append("br");
-                        div.append("b").text("Code file: " + d["CODE_FILE"]);
-                        div.append("br");
-                        div.append("b").text("Code line: " + d["CODE_LINE"]);
+                        for (let opt_index in opts){
+                            let opt = opts[opt_index];
+                            console.log("opt:: ", opt);
+                            if (opt.visible) {
+                                div.append("br");
+                                div.append("b").text(sentencify(opt.name) + ":- " + d[opt.name]);
+                            }
+                        }
+                    } else {
+                        if (d["CODE_FILE"] !== undefined) {
+                            div.append("br");
+                            div.append("br");
+                            div.append("b").text("Code file: " + d["CODE_FILE"]);
+                            div.append("br");
+                            div.append("b").text("Code line: " + d["CODE_LINE"]);
+                        }
                     }
+
+
 
 
                     if (d.CONTEXT_META !== undefined) {
