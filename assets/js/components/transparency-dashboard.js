@@ -3,8 +3,8 @@ angular.module('app.transparency_dashboard', [])
     .controller(
         'DashboardController',
         [
-            '$scope', '$rootScope',  'VisualisationService', 'Server',
-            function ($scope, $rootScope, visualisation, server) {
+             '$rootScope', '$scope', 'Server','TraceService',
+            function ($rootScope, $scope, server, trace) {
 
                 // default options
                 const DEFAULTS = {
@@ -15,6 +15,7 @@ angular.module('app.transparency_dashboard', [])
                         unTraversableNode: "#e74c3c"
                     },
                     maxTries:  1,
+                    recognisedTypes: ["belief", "message", "norm", "percept", "sensor", "value"],
                     rootNode: {payload: { contents: { IDENTIFIER: "[My Agent]"} }},
                 }
 
@@ -27,7 +28,12 @@ angular.module('app.transparency_dashboard', [])
                 let vm = this;                           // view model
                 vm.agents = { ...INITIAL_STATE.agents};  // known agents
                 vm.autoscroll = true;                    // autoscroll status
+                vm.filteredKnowledgeBase = [];
+                vm.knowledgeBase = [];
                 vm.serverIsRunning = false;              // debugger status
+                vm.searchString = "";                    // kb-search string
+
+
 
                 /** D3 variables **/
                 let diagonal,
@@ -60,8 +66,10 @@ angular.module('app.transparency_dashboard', [])
                 $rootScope.$on('AGENT-KB-CHANGED', function(event, changeInfo) {
                     if (changeInfo.agent === vm.agents.selected)
                     {
-                        const kbUpdate = visualisation.getAgentKBAt(changeInfo.agent, changeInfo.sequence);
+                        const kbUpdate = trace.getAgentKBAt(changeInfo.agent, changeInfo.sequence);
                         console.log(kbUpdate);
+                        vm.knowledgeBase = [...kbUpdate.beliefs, ...kbUpdate.removedBeliefs];
+                        vm.searchKnowledgeBase();
                     }
                 });
 
@@ -75,13 +83,17 @@ angular.module('app.transparency_dashboard', [])
                 $rootScope.$on('AGENT-STATE-CHANGED', function(event, agent) {
                    // if the state of the agent we have selected changes, we need to visualise it
                    if (vm.agents.selected === agent) {
-                       root =  visualisation.getAgentTrace(agent);
+                       root =  trace.getAgentTrace(agent);
                        updateVisualisation(root);
                    }
                 });
 
 
-
+                vm.getIcon = function(belief) {
+                    const iconName = DEFAULTS.recognisedTypes.includes(belief.type) ? belief.type : "unknown";
+                    return belief.isDeleted === undefined ?
+                        iconName : iconName + "_deleted";
+                }
 
                 /**
                  * vm.initialise
@@ -93,7 +105,7 @@ angular.module('app.transparency_dashboard', [])
                  * @agent {String | optional} Name of agent to set up the visualisation board for (optional parameter)
                  */
                 vm.initialise = function (agent) {
-                    server.setup(visualisation.onLogReceived);
+                    server.setup(trace.onLogReceived);
                     setupVisualisationBoard(agent);
                 }
 
@@ -103,6 +115,19 @@ angular.module('app.transparency_dashboard', [])
                  */
                 vm.reset = function () {
 
+                }
+
+                vm.searchKnowledgeBase = function () {
+                    if (vm.searchString.length === 0) {
+                        vm.filteredKnowledgeBase =  vm.knowledgeBase;
+                    } else {
+                        vm.filteredKnowledgeBase = _.filter(
+                            vm.knowledgeBase,
+                            function (belief) {
+                                return belief.value.startsWith(vm.searchString);
+                            }
+                        );
+                    }
                 }
 
                 /**
@@ -117,7 +142,7 @@ angular.module('app.transparency_dashboard', [])
                     const vBoard = angular.element(document.querySelector("#visualisation_board"));
                     vBoard.empty();
                     // initialise the visualisation board with the selected agent's data
-                    root =  visualisation.getAgentTrace(agent);
+                    root =  trace.getAgentTrace(agent);
                     vm.initialise(agent);
                 }
 
@@ -215,7 +240,7 @@ angular.module('app.transparency_dashboard', [])
                 }
 
                 function selectState (state) {
-
+                    // get bb for s
                 }
 
                 /**

@@ -32,8 +32,28 @@
                     </nav>
                     <br><br>
 
-                    <nav ng-include src="'preference_browser.html'"></nav>
-                    <nav ng-include src="'belief_browser.html'"></nav>
+                    <!--nav ng-include src="'preference_browser.html'"></nav-->
+                    <!--nav ng-include src="'belief_browser.html'"></nav-->
+                    <nav class="nav-group">
+                        <h5 class="nav-group-title">Knowledge Base</h5>
+                        <ul class="list-group">
+                            <li class="list-group-header">
+                                <input class="form-control" type="text"
+                                       ng-model="dashboard.searchString"
+                                       ng-change="dashboard.searchKnowledgeBase()"
+                                       placeholder="search knowledge-base">
+                            </li>
+                            <li class="list-group-item" ng-repeat="belief in dashboard.filteredKnowledgeBase">
+                                <img class="img-circle media-object pull-left"
+                                     ng-src="assets/images/source/{{dashboard.getIcon(belief)}}.png"
+                                     width="32" height="32">
+                                <div class="media-body">
+                                    <strong>{{belief.value}}</strong>
+                                    <p>{{belief.source}}<br><i>{{belief.type}}</i></p>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
 
                 <div class="pane fit" id="view_region">
@@ -50,7 +70,7 @@
                                     </a>
                                 </div>
                             </button>
-                            <span class="pull-right"><b>Visualising: {{dashboard.agents.selected}} &nbsp;&nbsp;</b></span>
+                            <span class="pull-right"><b>Visualising: {{dashboard.agents.selected || "None"}} &nbsp;&nbsp;</b></span>
                         </div>
 
 
@@ -63,26 +83,12 @@
         </div>
         <footer class="toolbar toolbar-footer">
             <div class="toolbar-actions">
-                <button class="btn btn-default pull0left"
+                <!--button class="btn btn-default pull0left"
                         ng-click="dashboard.showSettingsPage()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;Settings
-                </button>
-
-                <!--button class="btn btn-default pull0left" ng-click="dashboard.mimicAction()">
-                    <span class="icon icon-home icon-tools"></span>
-                    &nbsp;&nbsp;a
-                </button>
-
-                <button class="btn btn-default pull0left" ng-click="dashboard.mimicPlanTrace()">
-                    <span class="icon icon-home icon-tools"></span>
-                    &nbsp;&nbsp;pt
-                </button>
-
-                <button class="btn btn-default pull0left" ng-click="dashboard.mimicPlanSelection()">
-                    <span class="icon icon-home icon-tools"></span>
-                    &nbsp;ps
                 </button-->
+
 
                 <button class="btn  pull-right"
                     ng-class="{'btn-negative' : dashboard.serverIsRunning , 'btn-primary' : ! dashboard.serverIsRunning}"
@@ -183,11 +189,11 @@
     </script>
     <!-- app -->
     <script src="assets/js/app.js"></script>
-    <script src="assets/js/components/belief_browser.js"></script>
+    <!--script src="assets/js/components/belief_browser.js"></script-->
     <script src="assets/js/components/preferences.js"></script>
-    <script src="assets/js/components/server.js"></script>
     <script src="assets/js/components/settings.js"></script>
     <script src="assets/js/components/transparency-dashboard.js"></script>
-    <script src="assets/js/components/util.js"></script>
-    <script src="assets/js/components/visualisation-builder.js"></script>
+    <script src="assets/js/services/server.js"></script>
+    <script src="assets/js/services/trace-store.js"></script>
+    <script src="assets/js/services/util.js"></script>
 </html>

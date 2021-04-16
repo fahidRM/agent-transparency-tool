@@ -10,9 +10,9 @@
  */
 
 
-angular.module('app.data', [])
+angular.module('app.trace', [])
     .factory(
-        'VisualisationService',
+        'TraceService',
         [
             '$rootScope', 'UtilityService',
             function ($rootScope, utility) {
