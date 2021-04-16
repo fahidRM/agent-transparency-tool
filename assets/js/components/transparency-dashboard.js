@@ -185,7 +185,7 @@ angular.module('app.transparency_dashboard', [])
                         nodeColour = DEFAULTS.colours.failureNode;
                     }
                     else if (node.payload.contents.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
-                    else if ((node.CONTEXT_PASSED === undefined) || (node.CONTEXT_PASSED)) {
+                    else if ((node.context_summary === undefined) || (node.context_summary.context_passed)) {
                         nodeColour = DEFAULTS.colours.traversableNode
                     }
                     else {
@@ -246,8 +246,6 @@ angular.module('app.transparency_dashboard', [])
                     // ensure the knowledge-base browser is not over-written by new logs received
                     vm.freeze = true;
                     const kbUpdate = trace.getAgentKBAt(state.source.agent_uid, state.time.sequence_number);
-                    console.log("qq", state.source.agent_uid, state.time.sequence_number);
-                    console.log(kbUpdate);
                     vm.knowledgeBase = [...kbUpdate.beliefs, ...kbUpdate.removedBeliefs];
                     // preserve search filter
                     vm.searchKnowledgeBase();
@@ -331,7 +329,8 @@ angular.module('app.transparency_dashboard', [])
                             "fill",
                             function(d) {
                                 if (d.node_colour === undefined) {
-                                    d["node_colour"] = getNodeColour(d);
+                                    d["node_colour"] =getNodeColour
+                                    //return (d);
                                 }
                                 return d.node_colour;
                             });

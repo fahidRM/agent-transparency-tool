@@ -77,7 +77,7 @@ angular.module('app.trace', [])
                                 logSense(agent, state);
                                 break;
                             case DEFAULTS.states.planSelection:
-                                //logPlanSelection(agent, state);
+                                logPlanSelection(agent, state);
                                 break;
                             case DEFAULTS.states.planTrace:
                                 logPlanTrace(agent, state);
@@ -114,35 +114,46 @@ angular.module('app.trace', [])
 
                 }
 
-                function logPlanSelection (agent, stateLog) {
-                    const state = stateLog.TYPE_INFO;
+                function logPlanSelection (agent, planSelection) {
 
-                    if (vm.history[agent].branch !== null) {
+
+                    if (history[agent].branch !== null) {
                         let targetIndex = 0;
-                        vm.history[agent].branch.forEach(function(item, index) {
+                        history[agent].branch.forEach(function(item, index) {
+
                             if (
-                                (item.IDENTIFIER === state.IDENTIFIER)
+                                (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
                                 &&
-                                (item["CODE_LINE"] === state["CODE_LINE"])
+                                (item.payload.contents.CODE_LINE === planSelection.payload.contents.CODE_LINE)
                                 &&
-                                (item["CODE_FILE"] === state["CODE_FILE"])
+                                (item.payload.contents.CODE_FILE === planSelection.payload.contents.CODE_FILE)
                                 &&
+                                // TODO: uncomment...?
                                 //(item["CONTEXT_PASSED"] === true)
-                                (item["CONTEXT"] === state["CONTEXT"])
+                                (JSON.stringify(item.payload.contents.CONTEXT) === JSON.stringify(planSelection.payload.contents.CONTEXT))
 
                             ){
                                 targetIndex =  index;
                             }
                         });
                         // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
-                        vm.history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
+                        history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
                         swapBranchNodes(
                             agent,
-                            vm.history[agent].branch,
-                            Math.floor(vm.history[agent].branch.length / 2),
+                            history[agent].branch,
+                            Math.floor(history[agent].branch.length / 2),
                             targetIndex
                         )
                     }
+                }
+
+                function swapBranchNodes (agent, branch, indexA, indexB) {
+                    let temp = branch[indexA];
+                    branch[indexA] = branch[indexB];
+                    branch[indexB] = temp;
+                    history[agent].last["children"] = branch;
+                    history[agent].current = branch[indexA];
+                    history[agent].branch = branch;
                 }
 
                 function logPlanTrace (agent, planTrace) {
