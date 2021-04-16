@@ -58,6 +58,8 @@ angular.module('app.trace', [])
                     if (utility.isAValidLog(state)) {
                         // create a somewhat unique ID for agent....
                         const agent =  state.source.agent + " [" +  state.source.mas + "]";
+                        // place a UID
+                        state.source['agent_uid'] = agent;
                         // ensure agent is known and has a history cache...
                         if (history[agent] === undefined) {
                             agents.push(agent);

@@ -29,6 +29,7 @@ angular.module('app.transparency_dashboard', [])
                 vm.agents = { ...INITIAL_STATE.agents};  // known agents
                 vm.autoscroll = true;                    // autoscroll status
                 vm.filteredKnowledgeBase = [];
+                vm.freeze = false;
                 vm.knowledgeBase = [];
                 vm.serverIsRunning = false;              // debugger status
                 vm.searchString = "";                    // kb-search string
@@ -64,10 +65,9 @@ angular.module('app.transparency_dashboard', [])
                 });
 
                 $rootScope.$on('AGENT-KB-CHANGED', function(event, changeInfo) {
-                    if (changeInfo.agent === vm.agents.selected)
+                    if ((changeInfo.agent === vm.agents.selected) && ! vm.freeze)
                     {
                         const kbUpdate = trace.getAgentKBAt(changeInfo.agent, changeInfo.sequence);
-                        console.log(kbUpdate);
                         vm.knowledgeBase = [...kbUpdate.beliefs, ...kbUpdate.removedBeliefs];
                         vm.searchKnowledgeBase();
                     }
@@ -153,6 +153,7 @@ angular.module('app.transparency_dashboard', [])
                  */
                 vm.toggleAutoscroll = function () {
                     vm.autoscroll =  ! vm.autoscroll;
+                    if (vm.autoscroll) { vm.freeze = false; }
                 }
 
                 /**
@@ -240,8 +241,20 @@ angular.module('app.transparency_dashboard', [])
                 }
 
                 function selectState (state) {
-                    // get bb for s
+                    // ensure the dashboard doesnt scroll beyond what's being looked at
+                    vm.autoscroll = false;
+                    // ensure the knowledge-base browser is not over-written by new logs received
+                    vm.freeze = true;
+                    const kbUpdate = trace.getAgentKBAt(state.source.agent_uid, state.time.sequence_number);
+                    console.log("qq", state.source.agent_uid, state.time.sequence_number);
+                    console.log(kbUpdate);
+                    vm.knowledgeBase = [...kbUpdate.beliefs, ...kbUpdate.removedBeliefs];
+                    // preserve search filter
+                    vm.searchKnowledgeBase();
+                    $scope.$apply();
                 }
+
+
 
                 /**
                  * setupVisualisationBoard
