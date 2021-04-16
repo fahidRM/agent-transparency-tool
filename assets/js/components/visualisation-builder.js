@@ -18,14 +18,7 @@ angular.module('app.data', [])
             function ($rootScope, utility) {
 
                 const DEFAULTS = {
-                    colours: {
-                        failureNode: "#f8c291",
-                        traversedNode: "#16a085",
-                        traversableNode: "#1abc9c",
-                        unTraversableNode: "#e74c3c"
-                    },
                     invisibleNode: { IDENTIFIER: "", IS_PADDING_NODE: true },
-                    maxTries:  1,
                     rootNode: {IDENTIFIER: "[My Agent]"},
                     states: {
                         action: "ACTION",
@@ -79,16 +72,16 @@ angular.module('app.data', [])
                                 logAction(agent, state);
                                 break;
                             case DEFAULTS.states.sense:
-                                logSense(agent, state);
+                                //logSense(agent, state);
                                 break;
                             case DEFAULTS.states.planSelection:
-                                logPlanSelection(agent, state);
+                                //logPlanSelection(agent, state);
                                 break;
                             case DEFAULTS.states.planTrace:
                                 logPlanTrace(agent, state);
                                 break;
                             case DEFAULTS.states.planNotFound:
-                                logPlanNotFound(agent, state);
+                                //logPlanNotFound(agent, state);
                                 break;
                             default:    // there is nothing to do...
                                 return;
@@ -181,7 +174,7 @@ angular.module('app.data', [])
                     if ((history[agent].current !== undefined) &&
                         (history[agent].current !== null)){
                         history[agent].current["children"] = expandedOptions;
-                        history[agent].last = vm.history[agent].current;
+                        history[agent].last = history[agent].current;
                     }
 
                     history[agent].current = expandedOptions[visibleIndex];
@@ -194,9 +187,8 @@ angular.module('app.data', [])
                     });*/
                 }
 
-                function logSense (stateLog) {
+                function logSense (agent, sense) {
                     const state = stateLog.TYPE_INFO;
-                    const agent = stateLog.AGENT;
                     const sequence =  state.SEQUENCE_NUMBER;
 
 
@@ -256,11 +248,18 @@ angular.module('app.data', [])
 
 
 
+                function getAgentTrace (agent) {
+                    if (history[agent] !== undefined) {
+                        return history[agent].activities;
+                    }
+                    return {};
+                }
 
 
                 // service API
                 return {
                     getAgentsList: function () { return agents; },
+                    getAgentTrace: getAgentTrace,
                     onLogReceived: onStateReceived,
 
 
