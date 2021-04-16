@@ -14,8 +14,8 @@ angular.module('app.data', [])
     .factory(
         'VisualisationService',
         [
-            '$rootScope',
-            function ($rootScope) {
+            '$rootScope', 'UtilityService',
+            function ($rootScope, utility) {
 
                 const DEFAULTS = {
                     colours: {
@@ -51,82 +51,208 @@ angular.module('app.data', [])
                     history: {},
                 }
 
-
                 let agents = [];
                 let history = {...INITIAL_STATE.history};
 
 
+                /**
+                 * onStateReceived
+                 * Action to perform when an Agent's state (a log) is receicved
+                 *
+                 * @param state: Log received 
+                 */
+                function onStateReceived (state) {
+                    if (utility.isAValidLog(state)) {
+                        // create a somewhat unique ID for agent....
+                        const agent =  state.source.agent + " [" +  state.source.mas + "]";
+                        // ensure agent is known and has a history cache...
+                        if (history[agent] === undefined) {
+                            agents.push(agent);
+                            $rootScope.$broadcast('AGENT-DISCOVERED', agent);
+                            history[agent] = _.cloneDeep(INITIAL_STATE.agentHistory);
+                            history[agent].activities["IDENTIFIER"] = agent;
+                            history[agent].current = history[agent].activities;
+                        }
 
-                function onStateReceived (state, currentAgent, ) {
-                    // get rid of incomplete state
-                    if (state.TYPE_INFO === undefined) { return; }
-                    // identify agent (state
-                    const concernedAgent =  state.AGENT;
-                    // ensure agent is known and has a history cache...
-                    if (vm.history[concernedAgent] === undefined) {
-                        vm.history[concernedAgent] = _.cloneDeep(INITIAL_STATE.agentHistory);
-                        vm.history[concernedAgent].activities["IDENTIFIER"] = concernedAgent;
-                        vm.history[concernedAgent].current = vm.history[concernedAgent].activities;
-                        // store agents here....
-                        vm.agents.all.push(concernedAgent);
-                    }
+                        switch (state.payload.category) {
+                            case DEFAULTS.states.action:
+                                logAction(agent, state);
+                                break;
+                            case DEFAULTS.states.sense:
+                                logSense(agent, state);
+                                break;
+                            case DEFAULTS.states.planSelection:
+                                logPlanSelection(agent, state);
+                                break;
+                            case DEFAULTS.states.planTrace:
+                                logPlanTrace(agent, state);
+                                break;
+                            case DEFAULTS.states.planNotFound:
+                                logPlanNotFound(agent, state);
+                                break;
+                            default:    // there is nothing to do...
+                                return;
+                        }
 
-                    //todo: refactor out
-                    // visualise the agent if currently not visualising any agent...
-                    // this helps us to ensure we have to do nothing on first launch.
-                    if (vm.agents.selected === null) {
-                        vm.selectAgent(concernedAgent);
-                    }
-                    // mutate the object.....
-                    state.TYPE_INFO.SEQUENCE_NUMBER =  state.SEQUENCE_NUMBER;
-                    state.TYPE_INFO.AGENT = state.AGENT;
-                    state.TYPE_INFO.TYPE = state.TYPE;
-
-                    switch (state.TYPE) {
-                        case DEFAULTS.states.action:
-                            logAction(state);
-                            break;
-                        case DEFAULTS.states.sense:
-                            logSense(state);
-                            break;
-                        case DEFAULTS.states.planSelection:
-                            logPlanSelection(state);
-                            break;
-                        case DEFAULTS.states.planTrace:
-                            logPlanTrace(state);
-                            break;
-                        case DEFAULTS.states.planNotFound:
-                            logPlanNotFound(state);
-                            break;
-                        default:    // there is nothing to do...
-                            return;
-                    }
-
-                    // update the visualisation if we are currently looking at
-                    // the agent with the state update...
-                    if (vm.agents.selected === state.AGENT) {
-                        updateChart(state.AGENT);
-                    }
-
-                }
-
-
-
-
-
-
-                function update(log) {
-                    // construct an almost unique ID for the agent
-                    const logSource =  log.source.agent + " [" +  log.source.mas + "]";
-                    if (! agents.includes(logSource)) {
-                        agents.push(logSource);
-                        $rootScope.$broadcast('AGENT-DISCOVERED', logSource);
+                        // update listeners....
+                        $rootScope.$broadcast('AGENT-STATE-CHANGED', agent);
                     }
                 }
 
-                function retrieve (agent) {
+
+                function logAction (agent, action) {
+                    history[agent].branch = null;
+                    history[agent].current['children'] = [action];
+                    history[agent].last = history[agent].current;
+                    history[agent].current = action;
+                }
+
+                function logPlanNotFound (agent, stateLog) {
+                    /*const state = stateLog.TYPE_INFO;
+                    const agent = stateLog.AGENT;
+
+                    if (vm.history[agent].current === null) { return; }
+
+                    if (vm.history[agent].current.IDENTIFIER.trim() === state.IDENTIFIER.trim()) {
+                        vm.history[agent].current['FAILURE_REASON'] = state["REASON"];
+                    }*/
 
                 }
+
+                function logPlanSelection (agent, stateLog) {
+                    const state = stateLog.TYPE_INFO;
+
+                    if (vm.history[agent].branch !== null) {
+                        let targetIndex = 0;
+                        vm.history[agent].branch.forEach(function(item, index) {
+                            if (
+                                (item.IDENTIFIER === state.IDENTIFIER)
+                                &&
+                                (item["CODE_LINE"] === state["CODE_LINE"])
+                                &&
+                                (item["CODE_FILE"] === state["CODE_FILE"])
+                                &&
+                                //(item["CONTEXT_PASSED"] === true)
+                                (item["CONTEXT"] === state["CONTEXT"])
+
+                            ){
+                                targetIndex =  index;
+                            }
+                        });
+                        // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
+                        vm.history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
+                        console.log("swapping....");
+                        swapBranchNodes(
+                            agent,
+                            vm.history[agent].branch,
+                            Math.floor(vm.history[agent].branch.length / 2),
+                            targetIndex
+                        )
+                    }
+                }
+
+                function logPlanTrace (agent, planTrace) {
+
+                    const availableOptions = planTrace.payload.contents.length;
+                    const traceClone = _.cloneDeep(planTrace);
+                    let visibleIndex = 0;
+
+                    /*
+                        If there are an even number of available paths,
+                        insert an invisible node so we can gracefully
+                        ensure the agent's activities can be maintained on
+                        a straight line.
+                     */
+                    if ((availableOptions % 2) === 0) {
+                        planTrace.payload.contents.unshift({
+                            ...DEFAULTS.invisibleNode
+                        });
+                        visibleIndex =  1;
+                    }
+
+                    const expandedOptions = planTrace.payload.contents.map((option) => {
+                                                let optionEntry = {...traceClone};
+                                                optionEntry.payload.contents = option;
+                                                return optionEntry
+                                            });
+
+
+                    history[agent].branch = expandedOptions;
+                    if ((history[agent].current !== undefined) &&
+                        (history[agent].current !== null)){
+                        history[agent].current["children"] = expandedOptions;
+                        history[agent].last = vm.history[agent].current;
+                    }
+
+                    history[agent].current = expandedOptions[visibleIndex];
+
+                    //todo: context verification handling
+                    /*history[agent].branch.forEach(function (trace) {
+                        const val = verifyContext(agent, state.SEQUENCE_NUMBER, trace.CONTEXT);
+                        trace.CONTEXT_PASSED = val.CONTEXT_PASSED;
+                        trace.CONTEXT_META = val.CONTEXT_META;
+                    });*/
+                }
+
+                function logSense (stateLog) {
+                    const state = stateLog.TYPE_INFO;
+                    const agent = stateLog.AGENT;
+                    const sequence =  state.SEQUENCE_NUMBER;
+
+
+                    let currentState = [];
+                    if (state.ACTION === "DUMP") {
+                        const valueStr = state.VALUES || "";
+                        const values = valueStr.split(";");
+                        values.forEach(function (value) {
+                            const valueParts =  (value + "|").split("|");
+                            if (valueParts[0].trim().length > 0){
+                                currentState.push({
+                                    value: fixEntry(valueParts[0].trim()),
+                                    source: fixEntry(valueParts[1].trim()),
+                                    type: fixEntry(valueParts[2].trim())
+                                });
+                            }
+                        })
+                    }
+
+
+                    vm.history[agent].beliefs[( sequence + "").trim()] = _.uniqWith(currentState, _.isEqual);
+                    vm.history[agent].removedBeliefs[(sequence + "").trim()] = [];
+
+
+                    const previousSequence =  sequence - 1;
+                    if (
+                        vm.history[agent].beliefs[previousSequence + ""] !== undefined
+                    )
+                    {
+                        vm.history[agent].removedBeliefs[sequence + ""] =
+                            _.uniqWith(
+                                _.cloneDeep(
+                                    _.differenceBy(
+                                        vm.history[agent].beliefs[previousSequence + ""],
+                                        currentState,
+                                        "value"
+                                    )
+                                ),
+                                _.isEqual
+                            );
+
+
+                        vm.history[agent].removedBeliefs[sequence + ""].forEach(function  (val) {
+                            val.isDeleted = true;
+                        });
+                    }
+                    else {
+                        vm.history[agent].removedBeliefs[sequence + ""] = [];
+                    }
+
+                    if (agent === vm.agents.selected) {
+                        updateBeliefBrowser(agent, sequence);
+                        $scope.$apply();
+                    }
+                }
+
 
 
 
@@ -135,8 +261,9 @@ angular.module('app.data', [])
                 // service API
                 return {
                     getAgentsList: function () { return agents; },
-                    retrieve: retrieve,
-                    update: update,
+                    onLogReceived: onStateReceived,
+
+
 
                 };
 

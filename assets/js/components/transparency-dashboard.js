@@ -33,6 +33,10 @@ angular.module('app.transparency_dashboard', [])
                     $scope.$apply();
                 });
 
+                $rootScope.$on('AGENT-STATE-CHANGED', function(evemt, agent) {
+                   console.log("Update received for: " +  agent);
+                });
+
                 /**
                  * vm.initialise
                  * Initialises the tool
@@ -40,7 +44,7 @@ angular.module('app.transparency_dashboard', [])
                  * with the logs received
                  */
                 vm.initialise = function () {
-                    server.setup(visualisation.update);
+                    server.setup(visualisation.onLogReceived);
                 }
 
                 vm.reset = function () {

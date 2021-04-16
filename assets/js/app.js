@@ -6,5 +6,6 @@ const singlePageApplication = angular.module("agent-transparency-tool", [
     'app.server',                       // the server (express js server)
     'app.settings',                     // settings controller
     'app.transparency_dashboard',       // the main page controller
+    'app.util',                         // util fxns
 ]);
 
