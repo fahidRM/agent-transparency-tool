@@ -18,8 +18,8 @@ angular.module('app.data', [])
             function ($rootScope, utility) {
 
                 const DEFAULTS = {
-                    invisibleNode: { IDENTIFIER: "", IS_PADDING_NODE: true },
-                    rootNode: {IDENTIFIER: "[My Agent]"},
+                    invisibleNode: { payload: { contents: { IDENTIFIER: ""}} , IS_PADDING_NODE: true, IDENTIFIER: "" },
+                    rootNode: {payload: { contents: { IDENTIFIER: "[My Agent]"} }},
                     states: {
                         action: "ACTION",
                         planNotFound: "PLAN_NOT_FOUND",
@@ -63,7 +63,7 @@ angular.module('app.data', [])
                             agents.push(agent);
                             $rootScope.$broadcast('AGENT-DISCOVERED', agent);
                             history[agent] = _.cloneDeep(INITIAL_STATE.agentHistory);
-                            history[agent].activities["IDENTIFIER"] = agent;
+                            history[agent].activities.payload.contents.IDENTIFIER = agent;
                             history[agent].current = history[agent].activities;
                         }
 
@@ -72,7 +72,7 @@ angular.module('app.data', [])
                                 logAction(agent, state);
                                 break;
                             case DEFAULTS.states.sense:
-                                //logSense(agent, state);
+                                logSense(agent, state);
                                 break;
                             case DEFAULTS.states.planSelection:
                                 //logPlanSelection(agent, state);
@@ -134,7 +134,6 @@ angular.module('app.data', [])
                         });
                         // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
                         vm.history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
-                        console.log("swapping....");
                         swapBranchNodes(
                             agent,
                             vm.history[agent].branch,
@@ -163,13 +162,14 @@ angular.module('app.data', [])
                         visibleIndex =  1;
                     }
 
-                    const expandedOptions = planTrace.payload.contents.map((option) => {
-                                                let optionEntry = {...traceClone};
-                                                optionEntry.payload.contents = option;
-                                                return optionEntry
+                    let expandedOptions = [];
+
+                    planTrace.payload.contents.forEach((option) => {
+                                               expandedOptions.push({
+                                                   ...traceClone,
+                                                   payload: { category: 'PLAN_TRACE', contents: option }
+                                               })
                                             });
-
-
                     history[agent].branch = expandedOptions;
                     if ((history[agent].current !== undefined) &&
                         (history[agent].current !== null)){
@@ -178,7 +178,15 @@ angular.module('app.data', [])
                     }
 
                     history[agent].current = expandedOptions[visibleIndex];
-
+                    history[agent].branch.forEach((branchEntry) => {
+                       let contextSummary =  utility.verifyContext(
+                           agent,
+                           branchEntry.time.sequence_number,
+                           branchEntry.payload.contents.CONTEXT,
+                           history[agent].beliefs[branchEntry.time.sequence_number]
+                       )
+                        branchEntry["context_summary"] = contextSummary;
+                    });
                     //todo: context verification handling
                     /*history[agent].branch.forEach(function (trace) {
                         const val = verifyContext(agent, state.SEQUENCE_NUMBER, trace.CONTEXT);
@@ -188,41 +196,26 @@ angular.module('app.data', [])
                 }
 
                 function logSense (agent, sense) {
-                    const state = stateLog.TYPE_INFO;
-                    const sequence =  state.SEQUENCE_NUMBER;
-
-
+                    const sequence = sense.time.sequence_number;
                     let currentState = [];
-                    if (state.ACTION === "DUMP") {
-                        const valueStr = state.VALUES || "";
-                        const values = valueStr.split(";");
-                        values.forEach(function (value) {
-                            const valueParts =  (value + "|").split("|");
-                            if (valueParts[0].trim().length > 0){
-                                currentState.push({
-                                    value: fixEntry(valueParts[0].trim()),
-                                    source: fixEntry(valueParts[1].trim()),
-                                    type: fixEntry(valueParts[2].trim())
-                                });
-                            }
-                        })
+                    if (sense.payload.contents.ACTION === "DUMP") {
+                        currentState = sense.payload.contents.VALUES;
                     }
 
-
-                    vm.history[agent].beliefs[( sequence + "").trim()] = _.uniqWith(currentState, _.isEqual);
-                    vm.history[agent].removedBeliefs[(sequence + "").trim()] = [];
+                    history[agent].beliefs[( sequence + "").trim()] = _.uniqWith(currentState, _.isEqual);
+                    history[agent].removedBeliefs[(sequence + "").trim()] = [];
 
 
                     const previousSequence =  sequence - 1;
                     if (
-                        vm.history[agent].beliefs[previousSequence + ""] !== undefined
+                        history[agent].beliefs[previousSequence + ""] !== undefined
                     )
                     {
-                        vm.history[agent].removedBeliefs[sequence + ""] =
+                        history[agent].removedBeliefs[sequence + ""] =
                             _.uniqWith(
                                 _.cloneDeep(
                                     _.differenceBy(
-                                        vm.history[agent].beliefs[previousSequence + ""],
+                                        history[agent].beliefs[previousSequence + ""],
                                         currentState,
                                         "value"
                                     )
@@ -231,22 +224,28 @@ angular.module('app.data', [])
                             );
 
 
-                        vm.history[agent].removedBeliefs[sequence + ""].forEach(function  (val) {
+                        history[agent].removedBeliefs[sequence + ""].forEach(function  (val) {
                             val.isDeleted = true;
                         });
                     }
                     else {
-                        vm.history[agent].removedBeliefs[sequence + ""] = [];
+                        history[agent].removedBeliefs[sequence + ""] = [];
                     }
+                    $rootScope.$broadcast("AGENT-KB-CHANGED", {agent: agent, sequence: sequence})
 
-                    if (agent === vm.agents.selected) {
-                        updateBeliefBrowser(agent, sequence);
-                        $scope.$apply();
-                    }
                 }
 
 
+                function getAgentKB (agent, sequence) {
+                    if (history[agent] !== undefined) {
+                        return {
+                            beliefs: history[agent].beliefs[sequence],
+                            removedBeliefs: history[agent].removedBeliefs[sequence]
+                        }
+                    }
 
+                    return {};
+                }
 
                 function getAgentTrace (agent) {
                     if (history[agent] !== undefined) {
@@ -260,6 +259,7 @@ angular.module('app.data', [])
                 return {
                     getAgentsList: function () { return agents; },
                     getAgentTrace: getAgentTrace,
+                    getAgentKBAt: getAgentKB,
                     onLogReceived: onStateReceived,
 
 

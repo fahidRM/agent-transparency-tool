@@ -14,7 +14,8 @@ angular.module('app.transparency_dashboard', [])
                         traversableNode: "#1abc9c",
                         unTraversableNode: "#e74c3c"
                     },
-                    maxTries:  1
+                    maxTries:  1,
+                    rootNode: {payload: { contents: { IDENTIFIER: "[My Agent]"} }},
                 }
 
                 // initial states
@@ -56,6 +57,14 @@ angular.module('app.transparency_dashboard', [])
                     $scope.$apply();
                 });
 
+                $rootScope.$on('AGENT-KB-CHANGED', function(event, changeInfo) {
+                    if (changeInfo.agent === vm.agents.selected)
+                    {
+                        const kbUpdate = visualisation.getAgentKBAt(changeInfo.agent, changeInfo.sequence);
+                        console.log(kbUpdate);
+                    }
+                });
+
                 /**
                  * AGENT-STATE-CHANGED event listener
                  * listens to the event that an agent's state has changed
@@ -70,6 +79,9 @@ angular.module('app.transparency_dashboard', [])
                        updateVisualisation(root);
                    }
                 });
+
+
+
 
                 /**
                  * vm.initialise
@@ -133,6 +145,7 @@ angular.module('app.transparency_dashboard', [])
                 }
 
 
+
                 /**
                  * getNodeColour
                  * Inspect a node and decide what colour it should be
@@ -145,7 +158,7 @@ angular.module('app.transparency_dashboard', [])
                     if (node["FAILURE_REASON"] !== undefined) {
                         nodeColour = DEFAULTS.colours.failureNode;
                     }
-                    else if (node.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
+                    else if (node.payload.contents.IS_PADDING_NODE !== undefined) { nodeColour = "white"}
                     else if ((node.CONTEXT_PASSED === undefined) || (node.CONTEXT_PASSED)) {
                         nodeColour = DEFAULTS.colours.traversableNode
                     }
@@ -156,13 +169,62 @@ angular.module('app.transparency_dashboard', [])
                 }
 
 
+                function mouseover() {
+                    div.transition()
+                        .duration(100)
+                        .style("opacity", 1);
+                }
 
+                function mouseout() {
+                    div.transition()
+                        .duration(100)
+                        .style("opacity", 1e-6);
+                }
 
+                function mousemove(d) {
+                    //todo: regenerate if view preference changes at runtime
+                    if (d.mousemove_html === undefined) {
+                        div.text("")
+                            .style("left", (d3.event.pageX ) + "px")
+                            .style("top", (d3.event.pageY) + "px");
 
+                        div.append("b").text(d.payload.contents.IDENTIFIER);
+
+                        if (d.context_summary !== undefined) {
+                            div.append("br")
+                            div.append("br")
+                            div.append("b").text("context:");
+                            d.context_summary.context_info.forEach(function (context) {
+                                div.append("br")
+                                div.append("span")
+                                    .text(context[0])
+                                    .style("color",
+                                        context[1] ? DEFAULTS.colours.traversableNode
+                                            : DEFAULTS.colours.unTraversableNode
+                                    );
+                            });
+                        }
+                        d["mousemove_html"] = div.html();
+                    } else {
+                        div.html(d.mousemove_html);
+                        // reposition the tooltip
+                        // without this, the tooltip will appear in the wrong location
+                        div.style("left", (d3.event.pageX ) + "px")
+                            .style("top", (d3.event.pageY) + "px");
+                    }
+                }
+
+                function selectState (state) {
+
+                }
+
+                /**
+                 * setupVisualisationBoard
+                 * Sets up the visualisation board (d3 diagram)
+                 * @param agent {String | optional} Name of Agent to visualise (optional param)
+                 */
                 function setupVisualisationBoard(agent) {
-
                     const height = document.getElementById('view_region').offsetHeight - document.getElementById('view_header').offsetHeight - margin.top - margin.bottom;
-
                     tree = d3.layout.tree().size([height, width]);
                     diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });
                     svg = d3.select("#visualisation_board").append("svg")
@@ -171,19 +233,18 @@ angular.module('app.transparency_dashboard', [])
                             .append("g")
                             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-                    if (agent === undefined) {
-                        console.log(".......null agent.....");
-                        root = {};
-                        //root =  _.cloneDeep(vm.history[agent].activities);
-                        //todo: obtain activities from the visualisation....
-                    }
+                    if (agent === undefined) { root = {...DEFAULTS.rootNode}; }
                     root.x0 = height / 2;
                     root.y0 = 0;
                     updateVisualisation(root);
                 }
 
-
+                /**
+                 * update Visualisation
+                 * Updates the visualisation being shown on the dashboard
+                 *
+                 * @param source    {object}   Visualisation source object. i.e. Agent's trace
+                 */
                 function updateVisualisation (source) {
                     // Compute the new tree layout.
                     if (div === undefined) {
@@ -196,7 +257,7 @@ angular.module('app.transparency_dashboard', [])
                     let links = tree.links(nodes);
 
                     links = _.remove(links, function (link) {
-                        return (link.target.IS_PADDING_NODE === undefined);
+                        return (link.target.payload.contents.IS_PADDING_NODE === undefined);
                     });
 
 
@@ -220,18 +281,21 @@ angular.module('app.transparency_dashboard', [])
                             "transform",
                             function() {
                                 return "translate(" + source.y0 + "," + source.x0 + ")";
-                            });
-                        //.on("click", selectState);
+                            })
+                        .on("click", selectState);
 
                     nodeEnter.append("svg:circle")
-                        //.on("mouseover", mouseover)
-                        //.on("mousemove", function(d){mousemove(d);})
-                        //.on("mouseout", mouseout)
+                        .on("mouseover", mouseover)
+                        .on("mousemove", function(d){mousemove(d);})
+                        .on("mouseout", mouseout)
                         .attr("r", 1e-6)
                         .style(
                             "fill",
                             function(d) {
-                                return getNodeColour(d);
+                                if (d.node_colour === undefined) {
+                                    d["node_colour"] = getNodeColour(d);
+                                }
+                                return d.node_colour;
                             });
                     nodeEnter.append("svg:text")
                         .attr(
@@ -245,7 +309,8 @@ angular.module('app.transparency_dashboard', [])
                             function(d) {
                                 return d.children || d["_children"] ? "end" : "start";
                             })
-                        .text(function(d) { return "\n" + "A"; })
+                        .text(function(d) {
+                            return "\n" + d.payload.contents.IDENTIFIER; })
                         .style("fill-opacity", 1e-6);
 
                     // Transition nodes to their new position.
@@ -280,7 +345,7 @@ angular.module('app.transparency_dashboard', [])
                     // Update the links…
                     let link = svg.selectAll("path.link")
                         .data(links, function(d) {
-                            if (d.IS_PADDING_NODE !== undefined) {
+                            if (d.target.payload.contents.IS_PADDING_NODE !== undefined) {
                                 return null;
                             } else {
                                 return d.target.id;
@@ -329,13 +394,6 @@ angular.module('app.transparency_dashboard', [])
                     }
 
                 }
-
-
-
-
-
-
-
 
 
 
