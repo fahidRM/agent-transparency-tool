@@ -13,23 +13,34 @@ angular.module('app.util', [])
             return log !== null && log !== undefined && log.payload !== undefined && log.source !== undefined && log.time !== undefined;
         }
 
-        function hasBelief (beliefBase, context, ignoreBrackets) {
+
+        /**
+         * Checks to see if a specific piece of information is in the
+         * Knowledge base snapshot
+         *
+         * @param knowledgeBase   snapshot of the knowledgeBase
+         * @param context         information to search for
+         * @param ignoreBrackets  flag to ignore brackets (see parsing JASON context)
+         * @returns {boolean}     existence of information piece
+         */
+        function hasKnowledge (knowledgeBase, context, ignoreBrackets) {
             if (
-                (beliefBase === undefined) ||
-                (beliefBase === null) ||
+                (knowledgeBase === undefined) ||
+                (knowledgeBase === null) ||
                 (context === undefined) ||
                 (context === null)
 
             ){
                 return false;
             }
-            for (let belief of beliefBase) {
+            context = context.trim()
+            for (let knowledge of knowledgeBase) {
                 if (ignoreBrackets) {
-                    if (belief.value.trim().startsWith(context.trim())) {
+                    if (knowledge.value.startsWith(context)) {
                         return true;
                     }
                 }else {
-                    if (belief.value.trim() === context.trim()) {
+                    if (knowledge.value === context) {
                         return true;
                     }
                 }
@@ -37,28 +48,34 @@ angular.module('app.util', [])
             return false;
         }
 
-
-        function verifyContext (agent, sequence, context, agentBeliefsAtSequence) {
+        /**
+         * Verify that a context has passed or failed
+         *
+         * @param context                       Agent plan execution context
+         * @param agentKnowledgeBaseSnapshot    Snapshot of the agent's knowledge base at the point of planning
+         * @returns {{context_info: (string|boolean)[][], context_passed: boolean}|{context_info: *[], context_passed: boolean}}
+         */
+        function verifyContext ( context, agentKnowledgeBaseSnapshot) {
             if (context === undefined || context === "null" || context.length === 0) { return {
                 context_passed: true,
                 context_info: [ ["None", true]]
             } }
 
-            //const agentBeliefsAtSequence =  bbSnapshop; //vm.history[agent].beliefs[sequence];
+            let evaluationPassed = true;
             let evaluationSummary = [];
-            let evalPass = true;
+
 
             context.forEach((contextElement) => {
                 contextElement = contextElement.trim();
                 let evaluatesIfTrue = ! contextElement.startsWith("not");
                 if (! evaluatesIfTrue) { contextElement = contextElement.replace("not", "").trim(); }
 
-                const partPass = evaluatesIfTrue === hasBelief(
-                    agentBeliefsAtSequence,
+                const partPass = evaluatesIfTrue === hasKnowledge(
+                    agentKnowledgeBaseSnapshot,
                     contextElement,
                     contextElement.indexOf("_") > -1)
 
-                evalPass = evalPass && partPass;
+                evaluationPassed = evaluationPassed && partPass;
 
                 evaluationSummary.push([
                     evaluatesIfTrue ? contextElement : "not " +  contextElement,
@@ -68,7 +85,7 @@ angular.module('app.util', [])
             })
 
             return {
-                context_passed: evalPass,
+                context_passed: evaluationPassed,
                 context_info: evaluationSummary
             };
 

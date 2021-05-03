@@ -52,12 +52,27 @@ angular.module('app.server', [])
                  */
                 function setupRestApi (onLogReceived) {
                     if (hasBeenSetup) { return; }
+                    app.use(bodyParser.urlencoded())
                     app.use(bodyParser.json())
                     app.post('/log', (req, res) => {
                         // inform client that request has been received
                         res.send();
+
                         // handle request
-                        onLogReceived(req.body.log || {});
+                        /*
+                            console.log("Received");
+                            console.log(req.body);
+                            console.log("=======");
+                        */
+
+                        let payload =  req.body.log || req.body.msg || {};
+                        /*
+                            console.log("PAYLOAD ");
+                            console.log(payload);
+                            console.log("------------");
+                        */
+
+                        onLogReceived(payload);
                     });
                     hasBeenSetup = true;
                 }

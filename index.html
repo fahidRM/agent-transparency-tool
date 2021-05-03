@@ -1,7 +1,7 @@
 <! doctype html>
 <html>
     <head>
-        <title>Agent dashboard</title>
+        <title>Agent Transparency Tool</title>
         <link href="assets/css/photon.min.css" rel="stylesheet" />
         <link href="assets/css/app.css" rel="stylesheet" />
     </head>
@@ -34,7 +34,8 @@
 
                     <!--nav ng-include src="'preference_browser.html'"></nav-->
                     <!--nav ng-include src="'belief_browser.html'"></nav-->
-                    <nav class="nav-group">
+
+                    <nav class="nav-group" ng-if="! dashboard.isShowingSettingsPane">
                         <h5 class="nav-group-title">Knowledge Base</h5>
                         <ul class="list-group">
                             <li class="list-group-header">
@@ -54,6 +55,41 @@
                             </li>
                         </ul>
                     </nav>
+
+                    <nav class="nav-group" ng-if="dashboard.isShowingSettingsPane">
+                        <h5 class="nav-group-title">View Preference</h5>
+                        <ul class="list-group">
+                            <li class="list-group-header">
+                                <select class="form-control"
+                                        ng-model="dashboard.selectedViewPreference"
+                                        ng-options="preference.name for preference in dashboard.viewPreference">
+                                </select>
+                            </li>
+                            <li class="list-group-item" >
+                                <div class="checkbox" ng-repeat="option in dashboard.selectedViewPreference.options ">
+                                    <label>
+                                        <input type="checkbox"
+                                               ng-disabled="! option.canHide"
+                                               ng-click="dashboard.toggleViewPreference($index)"
+                                               ng-checked="{{option.visible === true}}"> {{option.name}}
+                                    </label>
+                                </div>
+                                <br>
+                                <br>
+                                <button type="submit"
+                                        ng-show="dashboard.selectedViewPreference !== null"
+                                        ng-click="dashboard.toggleSettingsPane()"
+                                        class="btn btn-form btn-default">Cancel</button>
+                                <button type="submit"
+                                        class="btn btn-form btn-primary"
+                                        ng-show="dashboard.selectedViewPreference !== null"
+                                        ng-click="dashboard.updateViewPreference()"
+                                >Update</button>
+                            </li>
+                            <br><br>
+                        </ul>
+                    </nav>
+
                 </div>
 
                 <div class="pane fit" id="view_region">
@@ -83,11 +119,11 @@
         </div>
         <footer class="toolbar toolbar-footer">
             <div class="toolbar-actions">
-                <!--button class="btn btn-default pull0left"
-                        ng-click="dashboard.showSettingsPage()">
+                <button class="btn btn-default pull0left"
+                        ng-click="dashboard.toggleSettingsPane()">
                     <span class="icon icon-home icon-tools"></span>
                     &nbsp;&nbsp;Settings
-                </button-->
+                </button>
 
 
                 <button class="btn  pull-right"
@@ -145,7 +181,7 @@
             <ul class="list-group">
                 <li class="list-group-header">
                     <select class="form-control"
-                            ng-change="viewPreference.setSelectionIndex($index)"
+                            ng-change="viewPreference.setSelectionIndex()"
                             ng-model="viewPreference.selectedLogType"
                             ng-options="logType.name for logType in viewPreference.logTypes">
 

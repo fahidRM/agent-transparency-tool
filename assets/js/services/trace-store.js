@@ -31,7 +31,6 @@ angular.module('app.trace', [])
 
                 // default agent state
                 const INITIAL_STATE = {
-                    agents: {all: []},
                     agentHistory: {
                         activities: DEFAULTS.rootNode,
                         beliefs: {},
@@ -41,12 +40,23 @@ angular.module('app.trace', [])
                         removedBeliefs: {},
                         selectedNode: null
                     },
-                    history: {},
+                    viewOptions: {
+                        ACTION: {index: 0, val: ['IDENTIFIER']},
+                        PLAN_NOT_FOUND: {index: 1, val: ['IDENTIFIER']},
+                        PLAN_TRACE: {index: 2, val: ['IDENTIFIER', 'CONTEXT']}
+                    },
+                    viewPreferences: [
+                        {index: 0, name: "ACTION", options: [{name: "IDENTIFIER", visible: true, canHide: false}]},
+                        {index: 1, name: "PLAN_NOT_FOUND", options: [{name: "IDENTIFIER", visible: true, canHide: false}]},
+                        {index: 2, name: "PLAN_TRACE", options: [{name: "IDENTIFIER", visible: true, canHide: false}, {name: "CONTEXT", visible: true, canHide: false}]}
+                    ]
                 }
 
                 let agents = [];
-                let history = {...INITIAL_STATE.history};
-
+                let applyingViewPreference = false;
+                let history = {};
+                let viewOptions = {...INITIAL_STATE.viewOptions};
+                let viewPreferences = INITIAL_STATE.viewPreferences;
 
                 /**
                  * onStateReceived
@@ -67,6 +77,11 @@ angular.module('app.trace', [])
                             history[agent] = _.cloneDeep(INITIAL_STATE.agentHistory);
                             history[agent].activities.payload.contents.IDENTIFIER = agent;
                             history[agent].current = history[agent].activities;
+                        }
+
+
+                        if (viewOptions[state.payload.category] !== undefined){
+                            updateViewOptions(state);
                         }
 
                         switch (state.payload.category) {
@@ -95,6 +110,22 @@ angular.module('app.trace', [])
                 }
 
 
+                function updateViewOptions (state) {
+                    const payloadCategory =  state.payload.category;
+                    const identifiedOptions =  payloadCategory === DEFAULTS.states.planTrace
+                                                ? Object.keys(state.payload.contents[0]) || []
+                                                : Object.keys(state.payload.contents);
+                    let newOptions = _.difference(identifiedOptions, viewOptions[payloadCategory].val);
+                    if (newOptions.length > 0) {
+                        newOptions.forEach(function (newOption){
+                           viewPreferences[viewOptions[payloadCategory].index].options.push(
+                               { name: newOption, visible: false, canHide: true }
+                           );
+                        });
+                        viewOptions[payloadCategory].val = newOptions.concat(viewOptions[payloadCategory].val);
+                    }
+                }
+
                 function logAction (agent, action) {
                     history[agent].branch = null;
                     history[agent].current['children'] = [action];
@@ -103,6 +134,7 @@ angular.module('app.trace', [])
                 }
 
                 function logPlanNotFound (agent, stateLog) {
+
                     /*const state = stateLog.TYPE_INFO;
                     const agent = stateLog.AGENT;
 
@@ -128,8 +160,6 @@ angular.module('app.trace', [])
                                 &&
                                 (item.payload.contents.CODE_FILE === planSelection.payload.contents.CODE_FILE)
                                 &&
-                                // TODO: uncomment...?
-                                //(item["CONTEXT_PASSED"] === true)
                                 (JSON.stringify(item.payload.contents.CONTEXT) === JSON.stringify(planSelection.payload.contents.CONTEXT))
 
                             ){
@@ -192,20 +222,11 @@ angular.module('app.trace', [])
 
                     history[agent].current = expandedOptions[visibleIndex];
                     history[agent].branch.forEach((branchEntry) => {
-                       let contextSummary =  utility.verifyContext(
-                           agent,
-                           branchEntry.time.sequence_number,
-                           branchEntry.payload.contents.CONTEXT,
-                           history[agent].beliefs[branchEntry.time.sequence_number]
-                       )
-                        branchEntry["context_summary"] = contextSummary;
+                       branchEntry["context_summary"] = utility.verifyContext(
+                            branchEntry.payload.contents.CONTEXT,
+                            history[agent].beliefs[branchEntry.time.sequence_number]
+                       );
                     });
-                    //todo: context verification handling
-                    /*history[agent].branch.forEach(function (trace) {
-                        const val = verifyContext(agent, state.SEQUENCE_NUMBER, trace.CONTEXT);
-                        trace.CONTEXT_PASSED = val.CONTEXT_PASSED;
-                        trace.CONTEXT_META = val.CONTEXT_META;
-                    });*/
                 }
 
                 function logSense (agent, sense) {
@@ -260,6 +281,11 @@ angular.module('app.trace', [])
                     return {};
                 }
 
+                function getAgentCurrentKB(agent) {
+                    let sequence = "";
+                    return getAgentKB(agent, sequence);
+                }
+
                 function getAgentTrace (agent) {
                     if (history[agent] !== undefined) {
                         return history[agent].activities;
@@ -268,15 +294,68 @@ angular.module('app.trace', [])
                 }
 
 
+
+
+                function reset(){
+                    agents = [];
+                    history = {};
+                    viewOptions = {...INITIAL_STATE.viewOptions};
+                    viewPreferences = INITIAL_STATE.viewPreferences;
+                }
+
+                function setViewPreference (preference) {
+                    viewPreferences = _.cloneDeep(preference);
+                    applyingViewPreference = true;
+                    agents.forEach(function (agent) {
+                        traverseHistory(history[agent].activities, function (state){
+                            state.mousemove_html = undefined;
+                        });
+                    });
+                    applyingViewPreference = false;
+                }
+
+                /**
+                 * traverseHistory
+                 * Traverses the history of an agent and applies the callback on each node
+                 *
+                 * @param rootNode  Root Node of agent history
+                 * @param callback  Callback to execute on each node...
+                 */
+                function traverseHistory (rootNode, callback) {
+                    callback(rootNode);
+                    if (rootNode.children !== undefined) {
+                        rootNode.children.forEach(function (child) {
+                           traverseHistory(child, callback);
+                        });
+                    }
+                }
+
+                function applyViewPreference (state) {
+                    // obtain the view preference for the state provided
+                    if (viewOptions[state.payload.category] !== undefined) {
+                        state.viewOptions = viewPreferences[
+                            viewOptions[state.payload.category].index
+                            ].options || [];
+                    }
+                }
+
+
+
+
+
                 // service API
                 return {
+                    applyViewPreference: applyViewPreference,
                     getAgentsList: function () { return agents; },
                     getAgentTrace: getAgentTrace,
                     getAgentKBAt: getAgentKB,
+                    getAgentCurrentKB: getAgentCurrentKB,
+                    getViewOptions: function () { return viewOptions; },
+                    getViewPreference: function () { return viewPreferences; },
+                    isApplyingViewPreference: function () { return applyingViewPreference; },
                     onLogReceived: onStateReceived,
-
-
-
+                    reset: reset,
+                    setViewPreference: setViewPreference
                 };
 
         }]);
