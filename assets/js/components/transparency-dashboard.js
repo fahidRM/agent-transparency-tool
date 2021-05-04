@@ -76,9 +76,9 @@ angular.module('app.transparency_dashboard', [])
 
                 /**
                  * AGENT-KB-CHANGED event listener
-                 * listens to the event that an agent's knowledgebase has been updated...
+                 * listens to the event that an agent's knowledge-base has been updated...
                  *
-                 * @param event:     {Object} angular-ja broadcase event object
+                 * @param event:     {Object} angular-ja broadcast event object
                  * @param changeInfo: {Object} Information about the change {agent: String, sequence: Integer}
                  */
                 $rootScope.$on('AGENT-KB-CHANGED', function(event, changeInfo) {

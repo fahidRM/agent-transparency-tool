@@ -60,7 +60,7 @@ angular.module('app.trace', [])
 
                 /**
                  * onStateReceived
-                 * Action to perform when an Agent's state (a log) is receicved
+                 * Action to perform when an Agent's state (a log) is received
                  *
                  * @param state: Log received 
                  */
@@ -98,7 +98,7 @@ angular.module('app.trace', [])
                                 logPlanTrace(agent, state);
                                 break;
                             case DEFAULTS.states.planNotFound:
-                                //logPlanNotFound(agent, state);
+                                logPlanNotFound(agent, state);
                                 break;
                             default:    // there is nothing to do...
                                 return;
@@ -156,11 +156,11 @@ angular.module('app.trace', [])
                             if (
                                 (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
                                 &&
-                                (item.payload.contents.CODE_LINE === planSelection.payload.contents.CODE_LINE)
+                                (item.payload.contents['CODE_LINE'] === planSelection.payload.contents['CODE_LINE'])
                                 &&
-                                (item.payload.contents.CODE_FILE === planSelection.payload.contents.CODE_FILE)
+                                (item.payload.contents['CODE_FILE'] === planSelection.payload.contents['CODE_FILE'])
                                 &&
-                                (JSON.stringify(item.payload.contents.CONTEXT) === JSON.stringify(planSelection.payload.contents.CONTEXT))
+                                (JSON.stringify(item.payload.contents['CONTEXT']) === JSON.stringify(planSelection.payload.contents['CONTEXT']))
 
                             ){
                                 targetIndex =  index;
@@ -223,17 +223,17 @@ angular.module('app.trace', [])
                     history[agent].current = expandedOptions[visibleIndex];
                     history[agent].branch.forEach((branchEntry) => {
                        branchEntry["context_summary"] = utility.verifyContext(
-                            branchEntry.payload.contents.CONTEXT,
-                            history[agent].beliefs[branchEntry.time.sequence_number]
+                            branchEntry.payload.contents['CONTEXT'],
+                            history[agent].beliefs[branchEntry.time['sequence_number']]
                        );
                     });
                 }
 
                 function logSense (agent, sense) {
-                    const sequence = sense.time.sequence_number;
+                    const sequence = sense.time['sequence_number'];
                     let currentState = [];
                     if (sense.payload.contents.ACTION === "DUMP") {
-                        currentState = sense.payload.contents.VALUES;
+                        currentState = sense.payload.contents['VALUES'];
                     }
 
                     history[agent].beliefs[( sequence + "").trim()] = _.uniqWith(currentState, _.isEqual);
@@ -281,10 +281,10 @@ angular.module('app.trace', [])
                     return {};
                 }
 
-                function getAgentCurrentKB(agent) {
+                /*function getAgentCurrentKB(agent) {
                     let sequence = "";
                     return getAgentKB(agent, sequence);
-                }
+                }*/
 
                 function getAgentTrace (agent) {
                     if (history[agent] !== undefined) {
@@ -346,11 +346,11 @@ angular.module('app.trace', [])
                 // service API
                 return {
                     applyViewPreference: applyViewPreference,
-                    getAgentsList: function () { return agents; },
+                    //getAgentsList: function () { return agents; },
                     getAgentTrace: getAgentTrace,
                     getAgentKBAt: getAgentKB,
-                    getAgentCurrentKB: getAgentCurrentKB,
-                    getViewOptions: function () { return viewOptions; },
+                    //getAgentCurrentKB: getAgentCurrentKB,
+                    //getViewOptions: function () { return viewOptions; },
                     getViewPreference: function () { return viewPreferences; },
                     isApplyingViewPreference: function () { return applyingViewPreference; },
                     onLogReceived: onStateReceived,
