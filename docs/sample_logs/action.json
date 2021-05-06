@@ -1,0 +1,19 @@
+{
+  "source": {
+    "agent": "agent2",
+    "mas": "Counter BDI MAS"
+  },
+  "payload": {
+    "category": "ACTION",
+    "contents": {
+      "IDENTIFIER": ".send",
+      "CODE_LINE": 18,
+      "CODE_FILE": "./asl/agent2.asl"
+    }
+  },
+  "time": {
+    "sequence_number": 5,
+    "time_in_ms": "",
+    "reasoning_cycle": 0
+  }
+}
