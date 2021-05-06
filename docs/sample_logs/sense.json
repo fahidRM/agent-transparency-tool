@@ -1,0 +1,29 @@
+{
+  "source": {
+    "agent": "agent1",
+    "mas": "Counter BDI MAS"
+  },
+  "payload": {
+    "category": "SENSE",
+    "contents": {
+      "ACTION": "DUMP",
+      "VALUES": [
+        {
+          "source": "we",
+          "type": "belief",
+          "value": "alice"
+        },
+        {
+          "source": "self",
+          "type": "Behaviour",
+          "value": "BDI Behaviour"
+        }
+      ]
+    }
+  },
+  "time": {
+    "sequence_number": 1,
+    "time_in_ms": "",
+    "reasoning_cycle": 0
+  }
+}

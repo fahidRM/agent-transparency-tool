@@ -1,0 +1,45 @@
+{
+  "source": {
+    "agent": "agent1",
+    "mas": "Counter BDI MAS"
+  },
+  "payload": {
+    "category": "PLAN_TRACE",
+    "contents": [
+      {
+        "IDENTIFIER": "count",
+        "CONTEXT": [
+          "inverted"
+        ],
+        "CODE_LINE": "",
+        "CODE_FILE": ""
+      },
+      {
+        "IDENTIFIER": "count",
+        "CONTEXT": [
+          "not inverted",
+          "is_in_spain"
+        ],
+        "CODE_LINE": "",
+        "CODE_FILE": ""
+      },
+      {
+        "IDENTIFIER": "count",
+        "CONTEXT": [
+          "not inverted",
+          "not is_in_spain",
+          "not has_cat",
+          "not has_spinach",
+          "has_antelope"
+        ],
+        "CODE_LINE": "",
+        "CODE_FILE": ""
+      }
+    ]
+  },
+  "time": {
+    "sequence_number": 1,
+    "time_in_ms": "",
+    "reasoning_cycle": 0
+  }
+}
