@@ -1,9 +1,17 @@
-## Agents Visual Debugger
+# Agent Transparency Tool [Desktop Application]
+
 __`Author`: `Fahid RM`__
 
 __`Email`: `frm24@bath.ac.uk`__
 
-Visual Debugging Tool for Multi-Agent Systems. 
+Visual Transparency Tool for Multi-Agent Systems.
+
+Project Page & Guides: https://fahidrm.github.io/agent-transparency-tool
+
+Quick Overview video: https://fahidrm.github.io/agent-transparency-tool/files/aamas2021vid_video_25.mp4
+
+
+
 
 
 #### 1.0. Installation
