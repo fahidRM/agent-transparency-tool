@@ -1,0 +1,531 @@
+[
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 1,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": "confirm attendance",
+          "CODE_LINE": 18,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 1,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "unavailable"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "available"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 2,
+        "time_in_ms": "",
+        "reasoning_cycle": 1
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "PLAN_TRACE",
+        "contents": [
+          {
+            "IDENTIFIER": "reschedule",
+            "CONTEXT": [
+              "not all_attendees_available"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "lock event",
+            "CONTEXT": [
+              "all_attendees_available"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+        ]
+      },
+      "time": {
+        "sequence_number": 2,
+        "time_in_ms": "",
+        "reasoning_cycle": 1
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "unavailable"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "available"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 3,
+        "time_in_ms": "",
+        "reasoning_cycle": 2
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "PLAN_SELECTION",
+        "contents": {
+            "IDENTIFIER": "reschedule",
+            "CONTEXT": [
+              "not all_attendees_available"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+      },
+      "time": {
+        "sequence_number": 3,
+        "time_in_ms": "",
+        "reasoning_cycle": 2
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "unavailable"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "available"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 4,
+        "time_in_ms": "",
+        "reasoning_cycle": 3
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": "request availability",
+          "CODE_LINE": 18,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 4,
+        "time_in_ms": "",
+        "reasoning_cycle": 3
+      }
+    }
+  },
+
+
+
+
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "free: 10 am"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 5,
+        "time_in_ms": "",
+        "reasoning_cycle": 4
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": "propose change",
+          "CODE_LINE": 18,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 5,
+        "time_in_ms": "",
+        "reasoning_cycle": 4
+      }
+    }
+  },
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "available at 9"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "available at 9"
+            },
+            {
+              "source": "Alice & Bob's Calendar",
+              "type": "",
+              "value": "all_attendees_available"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 6,
+        "time_in_ms": "",
+        "reasoning_cycle": 5
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "PLAN_TRACE",
+        "contents": [
+          {
+            "IDENTIFIER": "reschedule",
+            "CONTEXT": [
+              "not all_attendees_available"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "update event entry",
+            "CONTEXT": [
+              "all_attendees_available"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+        ]
+      },
+      "time": {
+        "sequence_number": 6,
+        "time_in_ms": "",
+        "reasoning_cycle": 5
+      }
+    }
+  },
+
+
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 11am"
+            },
+            {
+              "source": "schedule",
+              "type": "",
+              "value": "free: 12pm"
+            },
+            {
+              "source": "Alice's Calendar",
+              "type": "",
+              "value": "available at 9"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "free: 9am"
+            },
+            {
+              "source": "Bob's Calendar",
+              "type": "",
+              "value": "available at 9"
+            },
+            {
+              "source": "Alice & Bob's Calendar",
+              "type": "",
+              "value": "all_attendees_available"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 7,
+        "time_in_ms": "",
+        "reasoning_cycle": 6
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "smart calendar",
+        "mas": "Smart Calendar"
+      },
+      "payload": {
+        "category": "PLAN_SELECTION",
+        "contents": {
+          "IDENTIFIER": "update event entry",
+          "CONTEXT": [
+            "all_attendees_available"
+          ],
+          "CODE_LINE": "",
+          "CODE_FILE": ""
+        }
+      },
+      "time": {
+        "sequence_number": 7,
+        "time_in_ms": "",
+        "reasoning_cycle": 6
+      }
+    }
+  }
+]
