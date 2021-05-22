@@ -151,7 +151,10 @@ angular.module('app.trace', [])
 
                     if (history[agent].branch !== null) {
                         let targetIndex = 0;
+                        console.log(history[agent].branch);
                         history[agent].branch.forEach(function(item, index) {
+
+                            console.log("checkning...." + item.payload.contents.IDENTIFIER);
 
                             if (
                                 (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
@@ -161,8 +164,11 @@ angular.module('app.trace', [])
                                 (item.payload.contents['CODE_FILE'] === planSelection.payload.contents['CODE_FILE'])
                                 &&
                                 (JSON.stringify(item.payload.contents['CONTEXT']) === JSON.stringify(planSelection.payload.contents['CONTEXT']))
+                                &&
+                                (item['IS_PADDING_NODE'] === undefined)
 
                             ){
+                                console.log("PASSED....");
                                 targetIndex =  index;
                             }
                         });
@@ -213,6 +219,7 @@ angular.module('app.trace', [])
                                                    payload: { category: 'PLAN_TRACE', contents: option }
                                                })
                                             });
+                    history[agent].branch = null;
                     history[agent].branch = expandedOptions;
                     if ((history[agent].current !== undefined) &&
                         (history[agent].current !== null)){

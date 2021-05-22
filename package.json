@@ -1,17 +1,17 @@
 {
-  "name": "mas-graphical-debugger",
+  "name": "agent-transparency-tool",git
   "version": "1.0.0",
-  "description": "Graphical debugger for Multi-Agent Systems....",
+  "description": "Transparency Tool for Multi-Agent Systems....",
   "main": "main.js",
   "scripts": {
-    "build-all": "npm run delete-all-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=all --arch=all",
-    "build-lin": "npm run delete-lin-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=linux --arch=all",
-    "build-mac": "npm run delete-mac-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=darwin --arch=all",
-    "build-win": "npm run delete-win-build && npm run remove-dist && electron-packager . mas-graphical-debugger --platform=win32 --arch=all",
-    "delete-all-build": "rm -r ./mas-graphical-debugger* || true",
-    "delete-lin-build": "rm -r ./mas-graphical-debugger-linux* || true",
-    "delete-mac-build": "rm  -r ./mas-graphical-debugger-darwin* || true",
-    "delete-win-build": "rm  -r ./mas-graphical-debugger-win32* || true",
+    "build-all": "npm run delete-all-build && npm run remove-dist && electron-packager . agent-transparency-tool --platform=all --arch=all",
+    "build-lin": "npm run delete-lin-build && npm run remove-dist && electron-packager . agent-transparency-tool --platform=linux --arch=all",
+    "build-mac": "npm run delete-mac-build && npm run remove-dist && electron-packager . agent-transparency-tool --platform=darwin --arch=all",
+    "build-win": "npm run delete-win-build && npm run remove-dist && electron-packager . agent-transparency-tool --platform=win32 --arch=all",
+    "delete-all-build": "rm -r ./agent-transparency-tool* || true",
+    "delete-lin-build": "rm -r ./agent-transparency-tool-linux* || true",
+    "delete-mac-build": "rm  -r ./agent-transparency-tool-darwin* || true",
+    "delete-win-build": "rm  -r ./agent-transparency-tool-win32* || true",
     "remove-dist": "rm -r ./dist || true",
     "start": "electron main.js"
   },
@@ -20,14 +20,18 @@
     "debugger",
     "debugging",
     "graphical debugger",
+    "intelligent-systems",
     "mas",
     "multi-agent",
     "multi-agent systems",
-    "visualisation"
+    "transparency",
+    "transparency-tool",
+    "visualisation",
+    "visualisation-tool"
   ],
   "author": "Fahid RM",
   "email": "frm24@bath.ac.uk",
-  "license": "contact fahid",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^11.0.4",
     "electron-packager": "^15.2.0"

@@ -84,9 +84,11 @@ angular.module('app.transparency_dashboard', [])
                 $rootScope.$on('AGENT-KB-CHANGED', function(event, changeInfo) {
                     if ((changeInfo.agent === vm.agents.selected) && ! vm.freeze)
                     {
+
                         const kbUpdate = trace.getAgentKBAt(changeInfo.agent, changeInfo.sequence);
                         vm.knowledgeBase = [...kbUpdate.beliefs, ...kbUpdate.removedBeliefs];
                         vm.searchKnowledgeBase();
+                        $scope.$apply();
                     }
                 });
 
