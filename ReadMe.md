@@ -25,6 +25,7 @@ You may use the pre-built app (see [release tab](https://github.com/fahidRM/agen
 3. Launch you multi-agent system that has been configured to make log states as `JSON` as defined [here](http://).
 4. If your `MAS`  consists of multiple agents, use the selector to choose between agents. While no agent has been chosen, the app chooses the first agent that logs its state.
 
+![Screenshot](https://github.com/fahidRM/agent-debugger/blob/migrating-web-code/docs/debugger.png)
 
 #### 3.0. Running &amp; Building
 
