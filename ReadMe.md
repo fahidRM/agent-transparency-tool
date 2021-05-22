@@ -16,7 +16,7 @@ Quick Overview video: https://fahidrm.github.io/agent-transparency-tool/files/aa
 
 #### 1.0. Installation
 
-You may use the pre-built app (see [release tab](https://github.com/fahidRM/agent-debugger/releases)) or build this repository using the guide below (see section: `Running & Building`).
+You may use the pre-built app (see [release tab](https://github.com/fahidRM/agent-transparency-tool/releases)) or build this repository using the guide below (see section: `Running & Building`).
 
 #### 2.0. How to use
 
