@@ -75,6 +75,6 @@ All other dependencies have been bundled along with the source code. These are:
 
 #### 5.0. License
 
-Contact Fahid.
+MIT
 
   
