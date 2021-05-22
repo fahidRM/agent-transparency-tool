@@ -1,0 +1,714 @@
+[
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "we",
+              "type": "belief",
+              "value": "alice"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 1,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_TRACE",
+        "contents": [
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "inverted"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "not inverted",
+              "is_in_spain"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "not inverted",
+              "not is_in_spain",
+              "not has_cat",
+              "not has_spinach",
+              "has_antelope"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+        ]
+      },
+      "time": {
+        "sequence_number": 1,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "we",
+              "type": "belief",
+              "value": "alice"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 2,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_SELECTION",
+        "contents": {
+          "IDENTIFIER": "count",
+          "CONTEXT": [
+            "not inverted",
+            "not is_in_spain",
+            "not has_cat",
+            "not has_spinach",
+            "has_antelope"
+          ],
+          "CODE_LINE": "",
+          "CODE_FILE": ""
+        }
+      },
+      "time": {
+        "sequence_number": 2,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 3,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_TRACE",
+        "contents": [
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "inverted"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "not inverted"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+        ]
+      },
+      "time": {
+        "sequence_number": 3,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 4,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_SELECTION",
+        "contents": {
+          "IDENTIFIER": "count",
+          "CONTEXT": [
+            "not inverted"
+          ],
+          "CODE_LINE": "",
+          "CODE_FILE": ""
+        }
+      },
+      "time": {
+        "sequence_number": 4,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 5,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": ".send",
+          "CODE_LINE": 18,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 5,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 6,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": ".count_up",
+          "CODE_LINE": 19,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 6,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "inverted"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 7,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_TRACE",
+        "contents": [
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "inverted"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          },
+          {
+            "IDENTIFIER": "count",
+            "CONTEXT": [
+              "not inverted"
+            ],
+            "CODE_LINE": "",
+            "CODE_FILE": ""
+          }
+        ]
+      },
+      "time": {
+        "sequence_number": 7,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "inverted"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 8,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "PLAN_SELECTION",
+        "contents": {
+          "IDENTIFIER": "count",
+          "CONTEXT": [
+            "inverted"
+          ],
+          "CODE_LINE": "",
+          "CODE_FILE": ""
+        }
+      },
+      "time": {
+        "sequence_number": 8,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "inverted"
+            },
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "has_cat"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 9,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent2",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": ".count_down",
+          "CODE_LINE": 9,
+          "CODE_FILE": "./asl/agent2.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 9,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "we",
+              "type": "belief",
+              "value": "alice"
+            },
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "inverted"
+            },
+            {
+              "source": "agent2",
+              "type": "belief",
+              "value": "jjp"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 10,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": ".print",
+          "CODE_LINE": 19,
+          "CODE_FILE": "./asl/agent1.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 10,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "SENSE",
+        "contents": {
+          "ACTION": "DUMP",
+          "VALUES": [
+            {
+              "source": "we",
+              "type": "belief",
+              "value": "alice"
+            },
+            {
+              "source": "self",
+              "type": "belief",
+              "value": "inverted"
+            },
+            {
+              "source": "agent2",
+              "type": "belief",
+              "value": "jjp"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            },
+            {
+              "source": "self",
+              "type": "Behaviour",
+              "value": "BDI Behaviour"
+            }
+          ]
+        }
+      },
+      "time": {
+        "sequence_number": 11,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  },
+  {
+    "log": {
+      "source": {
+        "agent": "agent1",
+        "mas": "Counter BDI MAS"
+      },
+      "payload": {
+        "category": "ACTION",
+        "contents": {
+          "IDENTIFIER": ".count_up",
+          "CODE_LINE": 19,
+          "CODE_FILE": "./asl/agent1.asl"
+        }
+      },
+      "time": {
+        "sequence_number": 11,
+        "time_in_ms": "",
+        "reasoning_cycle": 0
+      }
+    }
+  }
+]

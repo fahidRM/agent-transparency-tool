@@ -1,0 +1,233 @@
+<! doctype html>
+<html>
+    <head>
+        <title>Agent Transparency Tool</title>
+        <link href="assets/css/photon.min.css" rel="stylesheet" />
+        <link href="assets/css/app.css" rel="stylesheet" />
+    </head>
+    <body class="animsition"
+          ng-app = "agent-transparency-tool"
+          ng-controller = "DashboardController as dashboard"
+          ng-init="dashboard.initialise()">
+    <div class="window">
+        <div class="window-content">
+            <div class="pane-group">
+                <div class="pane pane-sm sidebar">
+                    <br><br>
+                    <nav class="nav-group">
+                        <h5 class="nav-group-title collapsible-nav-group">Nodes</h5>
+                        <br class="collapsible-nav-group-item">
+                        <span class="nav-group-item collapsible-nav-group-item" href="#">
+                            <span class="icon icon-record" style="color:#e15f41"></span>
+                            Non-Viable Path
+                        </span>
+                        <span class="nav-group-item collapsible-nav-group-item" href="#">
+                            <span class="icon icon-record" style="color:#f7d794"></span>
+                            Failed Path
+                        </span>
+                        <span class="nav-group-item collapsible-nav-group-item" href="#">
+                            <span class="icon icon-record" style="color:#0fb9b1"></span>
+                            Traversed / Viable Path
+                        </span>
+                    </nav>
+                    <br><br>
+
+                    <!--nav ng-include src="'preference_browser.html'"></nav-->
+                    <!--nav ng-include src="'belief_browser.html'"></nav-->
+
+                    <nav class="nav-group" ng-if="! dashboard.isShowingSettingsPane">
+                        <h5 class="nav-group-title">Knowledge Base</h5>
+                        <ul class="list-group">
+                            <li class="list-group-header">
+                                <input class="form-control" type="text"
+                                       ng-model="dashboard.searchString"
+                                       ng-change="dashboard.searchKnowledgeBase()"
+                                       placeholder="search knowledge-base">
+                            </li>
+                            <li class="list-group-item" ng-repeat="belief in dashboard.filteredKnowledgeBase">
+                                <img class="img-circle media-object pull-left"
+                                     ng-src="assets/images/source/{{dashboard.getIcon(belief)}}.png"
+                                     width="32" height="32">
+                                <div class="media-body">
+                                    <strong>{{belief.value}}</strong>
+                                    <p>{{belief.source}}<br><i>{{belief.type}}</i></p>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <nav class="nav-group" ng-if="dashboard.isShowingSettingsPane">
+                        <h5 class="nav-group-title">View Preference</h5>
+                        <ul class="list-group">
+                            <li class="list-group-header">
+                                <select class="form-control"
+                                        ng-model="dashboard.selectedViewPreference"
+                                        ng-options="preference.name for preference in dashboard.viewPreference">
+                                </select>
+                            </li>
+                            <li class="list-group-item" >
+                                <div class="checkbox" ng-repeat="option in dashboard.selectedViewPreference.options ">
+                                    <label>
+                                        <input type="checkbox"
+                                               ng-disabled="! option.canHide"
+                                               ng-click="dashboard.toggleViewPreference($index)"
+                                               ng-checked="{{option.visible === true}}"> {{option.name}}
+                                    </label>
+                                </div>
+                                <br>
+                                <br>
+                                <button type="submit"
+                                        ng-show="dashboard.selectedViewPreference !== null"
+                                        ng-click="dashboard.toggleSettingsPane()"
+                                        class="btn btn-form btn-default">Cancel</button>
+                                <button type="submit"
+                                        class="btn btn-form btn-primary"
+                                        ng-show="dashboard.selectedViewPreference !== null"
+                                        ng-click="dashboard.updateViewPreference()"
+                                >Update</button>
+                            </li>
+                            <br><br>
+                        </ul>
+                    </nav>
+
+                </div>
+
+                <div class="pane fit" id="view_region">
+                    <!-- Agent Selection-->
+                    <header class="toolbar toolbar-header" id="view_header">
+                        <div class="toolbar-actions">
+                            <button class="btn btn-default btn-dropdown dropdown">
+                                <span class="icon icon-user dropbtn" ></span>
+                                <div class="dropdown-content">
+                                    <a href="#"
+                                       ng-click="dashboard.selectAgent(agent)"
+                                       ng-repeat="agent in dashboard.agents.all">
+                                        {{agent}}
+                                    </a>
+                                </div>
+                            </button>
+                            <span class="pull-right"><b>Visualising: {{dashboard.agents.selected || "None"}} &nbsp;&nbsp;</b></span>
+                        </div>
+
+
+                    </header>
+                    <!-- Visualisation -->
+                    <div id="visualisation_board" class="fit-and-scroll">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="toolbar toolbar-footer">
+            <div class="toolbar-actions">
+                <button class="btn btn-default pull0left"
+                        ng-click="dashboard.toggleSettingsPane()">
+                    <span class="icon icon-home icon-tools"></span>
+                    &nbsp;&nbsp;Settings
+                </button>
+
+
+                <button class="btn  pull-right"
+                    ng-class="{'btn-negative' : dashboard.serverIsRunning , 'btn-primary' : ! dashboard.serverIsRunning}"
+                    ng-click="dashboard.toggleServer()">
+                    {{dashboard.serverIsRunning ? 'Stop dashboard' : 'Start dashboard'}}
+                </button>
+
+                <button class="btn  pull-right btn-default"
+                        ng-click="dashboard.toggleAutoscroll()">
+                    {{dashboard.autoscroll? 'Disable Autoscroll' : 'Enable Autoscroll'}}
+                </button>
+
+                <button class="btn  pull-right btn-default"
+                        ng-class="{'btn-negative' : ! dashboard.serverIsRunning , 'disabled' : dashboard.serverIsRunning}"
+                        ng-hide="dashboard.serverIsRunning || dashboard.agents.all.length === 0"
+                        ng-click="dashboard.reset()">
+                    Reset
+                </button>
+
+
+
+            </div>
+        </footer>
+    </div>
+    </body>
+
+    <!-- angular templates -->
+    <script type="text/ng-template" id="belief_browser.html">
+        <nav class="nav-group" ng-controller="BeliefBrowserController as bb">
+            <h5 class="nav-group-title">Beliefs</h5>
+            <ul class="list-group">
+                <li class="list-group-header">
+                    <input class="form-control" type="text"
+                           ng-model="bb.searchString"
+                           ng-change="bb.search()"
+                           placeholder="Search">
+                </li>
+                <li class="list-group-item" ng-repeat="belief in bb.filteredBeliefs">
+                    <img class="img-circle media-object pull-left"
+                         ng-src="assets/images/source/{{bb.getIcon(belief)}}.png"
+                         width="32" height="32">
+                    <div class="media-body">
+                        <strong>{{belief.value}}</strong>
+                        <p>{{belief.source}}<br><i>{{belief.type}}</i></p>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </script>
+
+    <script type="text/ng-template" id="preference_browser.html">
+        <nav class="nav-group" ng-controller="ViewPreferenceController as viewPreference">
+            <h5 class="nav-group-title">View Preferences</h5>
+            <ul class="list-group">
+                <li class="list-group-header">
+                    <select class="form-control"
+                            ng-change="viewPreference.setSelectionIndex()"
+                            ng-model="viewPreference.selectedLogType"
+                            ng-options="logType.name for logType in viewPreference.logTypes">
+
+                    </select>
+                </li>
+                <li class="list-group-item" >
+                    <div class="checkbox" ng-repeat="prop in viewPreference.selectedLogType.props ">
+                        <label>
+                            <input type="checkbox"
+                                   ng-click="viewPreference.togglePropVisibility($index)"
+                                   checked="{{prop.visible === true}}"> {{prop.name}}
+                        </label>
+                    </div>
+                    <br>
+                    <br>
+                    <button type="submit"
+                            ng-show="viewPreference.selectedLogType !== null"
+                            class="btn btn-form btn-default">Cancel</button>
+                    <button type="submit"
+                            class="btn btn-form btn-primary"
+                            ng-show="viewPreference.selectedLogType !== null"
+                            ng-click="viewPreference.onViewPreferenceUpdated(null, null)"
+                    >Update</button>
+                </li>
+               <br><br>
+            </ul>
+        </nav>
+    </script>
+
+
+
+
+    <!-- dependencies -->
+    <script>var jQuery=window.$=window.jQuery=require('./assets/js/dependencies/jquery-3.2.1.min.js');</script>
+    <script src="assets/js/dependencies/angular.min.js"></script>
+    <script>var d3=window.$=window.d3=require('./assets/js/dependencies/d3.min.js');</script>
+    <script src="assets/js/dependencies/lodash.min.js"></script>
+    <!-- necessary js -->
+    <script>
+        const ipcRenderer=require('electron').ipcRenderer;
+    </script>
+    <!-- app -->
+    <script src="assets/js/app.js"></script>
+    <!--script src="assets/js/components/belief_browser.js"></script-->
+    <script src="assets/js/components/transparency-dashboard.js"></script>
+    <script src="assets/js/services/server.js"></script>
+    <script src="assets/js/services/trace-store.js"></script>
+    <script src="assets/js/services/util.js"></script>
+</html>

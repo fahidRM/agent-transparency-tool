@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agents Debugger - Settings</title>
+    <link href="assets/css/photon.min.css" rel="stylesheet" />
+    <link href="assets/css/app.css" rel="stylesheet" />
+</head>
+<body ng-app = "graphical-debugger-pages"
+      ng-controller = "SettingsPageController as page"
+      ng-init="debugger.initialise()">
+<button class="btn  pull-right btn-default"
+        ng-click="page.closePage()">
+    Close
+</button>
+
+    <script>var jQuery=window.$=window.jQuery=require('./assets/js/dependencies/jquery-3.2.1.min.js');</script>
+    <script src="assets/js/dependencies/angular.min.js"></script>
+    <script src="assets/js/app-pages.js"></script>
+    <script src="assets/js/components/settings.js"></script>
+    <script src="assets/js/components/settings-page.js"></script>
+</body>
+</html>
