@@ -67,20 +67,30 @@ angular.module('app.util', [])
 
             context.forEach((contextElement) => {
                 contextElement = contextElement.trim();
-                let evaluatesIfTrue = ! contextElement.startsWith("not");
-                if (! evaluatesIfTrue) { contextElement = contextElement.replace("not", "").trim(); }
 
-                const partPass = evaluatesIfTrue === hasKnowledge(
-                    agentKnowledgeBaseSnapshot,
-                    contextElement,
-                    contextElement.indexOf("_") > -1)
+                if (contextElement === "null") {
+                    evaluationSummary.push([
+                        "No context",
+                        true
+                    ])
+                } else {
+                    let evaluatesIfTrue = ! contextElement.startsWith("not");
+                    if (! evaluatesIfTrue) { contextElement = contextElement.replace("not", "").trim(); }
 
-                evaluationPassed = evaluationPassed && partPass;
+                    const partPass = evaluatesIfTrue === hasKnowledge(
+                        agentKnowledgeBaseSnapshot,
+                        contextElement,
+                        contextElement.indexOf("_") > -1)
 
-                evaluationSummary.push([
-                    evaluatesIfTrue ? contextElement : "not " +  contextElement,
-                    partPass
-                ])
+                    evaluationPassed = evaluationPassed && partPass;
+                    evaluationSummary.push([
+                        evaluatesIfTrue ? contextElement : "not " +  contextElement,
+                        partPass
+                    ])
+                }
+
+
+
 
             })
 
