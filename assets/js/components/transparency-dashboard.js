@@ -471,7 +471,7 @@ angular.module('app.transparency_dashboard', [])
                                 return d.children || d["_children"] ? "end" : "start";
                             })
                         .text(function(d) {
-                            return "\n" + (d.payload ? d.payload.contents.IDENTIFIER : ""); })
+                            return "\n" + (d.payload ? d.payload.contents.IDENTIFIER.substring(0, 10) : ""); })
                         .style("fill-opacity", 1e-6);
 
                     // Transition nodes to their new position.

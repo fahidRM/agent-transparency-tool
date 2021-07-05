@@ -147,14 +147,12 @@ angular.module('app.trace', [])
                 }
 
                 function logPlanSelection (agent, planSelection) {
-
-
                     if (history[agent].branch !== null) {
                         let targetIndex = 0;
                         console.log(history[agent].branch);
                         history[agent].branch.forEach(function(item, index) {
 
-                            console.log("checkning...." + item.payload.contents.IDENTIFIER);
+                            console.log("checking...." + item.payload.contents.IDENTIFIER);
 
                             if (
                                 (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
