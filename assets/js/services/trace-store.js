@@ -152,7 +152,7 @@ angular.module('app.trace', [])
                         console.log(history[agent].branch);
                         history[agent].branch.forEach(function(item, index) {
 
-                            console.log("checking...." + item.payload.contents.IDENTIFIER);
+                            //console.log("checking...." + item.payload.contents.IDENTIFIER);
 
                             if (
                                 (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
@@ -166,12 +166,20 @@ angular.module('app.trace', [])
                                 (item['IS_PADDING_NODE'] === undefined)
 
                             ){
-                                console.log("PASSED....");
+                                //console.log("PASSED....");
                                 targetIndex =  index;
                             }
                         });
+                        console.log("*********************");
+                        console.log(history[agent].branch[targetIndex]);
                         // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
-                        history[agent].branch[targetIndex]['CONTEXT_PASSED'] = true;
+                        // address complex context bug and remove next 3 lines....
+                        history[agent].branch[targetIndex]['context_passed'] = true;
+                        history[agent].branch[targetIndex]['context_summary']['context_passed'] = true;
+                        history[agent].branch[targetIndex]['node_colour'] = undefined;
+
+                        console.log(history[agent].branch[targetIndex]);
+                        console.log("*********************");
                         swapBranchNodes(
                             agent,
                             history[agent].branch,

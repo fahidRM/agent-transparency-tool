@@ -88,10 +88,6 @@ angular.module('app.util', [])
                         partPass
                     ])
                 }
-
-
-
-
             })
 
             return {
@@ -100,7 +96,6 @@ angular.module('app.util', [])
             };
 
         }
-
 
 
 

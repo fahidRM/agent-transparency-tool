@@ -454,7 +454,6 @@ angular.module('app.transparency_dashboard', [])
                             function(d) {
                                 if (d.node_colour === undefined) {
                                     d["node_colour"] =getNodeColour
-                                    //return (d);
                                 }
                                 return d.node_colour;
                             });
