@@ -170,16 +170,12 @@ angular.module('app.trace', [])
                                 targetIndex =  index;
                             }
                         });
-                        console.log("*********************");
-                        console.log(history[agent].branch[targetIndex]);
+
                         // CASES WHERE WE HAVE A FLAWED context HIGHLIGHT
                         // address complex context bug and remove next 3 lines....
                         history[agent].branch[targetIndex]['context_passed'] = true;
                         history[agent].branch[targetIndex]['context_summary']['context_passed'] = true;
                         history[agent].branch[targetIndex]['node_colour'] = undefined;
-
-                        console.log(history[agent].branch[targetIndex]);
-                        console.log("*********************");
                         swapBranchNodes(
                             agent,
                             history[agent].branch,
