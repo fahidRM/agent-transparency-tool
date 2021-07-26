@@ -58,6 +58,9 @@ angular.module('app.trace', [])
                 let viewOptions = {...INITIAL_STATE.viewOptions};
                 let viewPreferences = INITIAL_STATE.viewPreferences;
 
+                // to allow us trigger the state selection manually...
+                let currentState =  null;
+
                 /**
                  * onStateReceived
                  * Action to perform when an Agent's state (a log) is received
@@ -131,6 +134,7 @@ angular.module('app.trace', [])
                     history[agent].current['children'] = [action];
                     history[agent].last = history[agent].current;
                     history[agent].current = action;
+                    currentState =  action;
                 }
 
                 function logPlanNotFound (agent, stateLog) {
@@ -149,11 +153,7 @@ angular.module('app.trace', [])
                 function logPlanSelection (agent, planSelection) {
                     if (history[agent].branch !== null) {
                         let targetIndex = 0;
-                        console.log(history[agent].branch);
                         history[agent].branch.forEach(function(item, index) {
-
-                            //console.log("checking...." + item.payload.contents.IDENTIFIER);
-
                             if (
                                 (item.payload.contents.IDENTIFIER === planSelection.payload.contents.IDENTIFIER)
                                 &&
@@ -166,7 +166,6 @@ angular.module('app.trace', [])
                                 (item['IS_PADDING_NODE'] === undefined)
 
                             ){
-                                //console.log("PASSED....");
                                 targetIndex =  index;
                             }
                         });
@@ -181,7 +180,8 @@ angular.module('app.trace', [])
                             history[agent].branch,
                             Math.floor(history[agent].branch.length / 2),
                             targetIndex
-                        )
+                        );
+                        currentState =  history[agent].branch[Math.floor(history[agent].branch.length / 2)];
                     }
                 }
 
@@ -236,6 +236,9 @@ angular.module('app.trace', [])
                             history[agent].beliefs[branchEntry.time['sequence_number']]
                        );
                     });
+
+                    currentState =  history[agent].branch[Math.floor(history[agent].branch.length / 2)];
+
                 }
 
                 function logSense (agent, sense) {
@@ -274,7 +277,8 @@ angular.module('app.trace', [])
                     else {
                         history[agent].removedBeliefs[sequence + ""] = [];
                     }
-                    $rootScope.$broadcast("AGENT-KB-CHANGED", {agent: agent, sequence: sequence})
+                    // do not auto refresh....
+                    //$rootScope.$broadcast("AGENT-KB-CHANGED", {agent: agent, sequence: sequence})
 
                 }
 
@@ -360,6 +364,7 @@ angular.module('app.trace', [])
                     getAgentKBAt: getAgentKB,
                     //getAgentCurrentKB: getAgentCurrentKB,
                     //getViewOptions: function () { return viewOptions; },
+                    getCurrentState: function () { return currentState; },
                     getViewPreference: function () { return viewPreferences; },
                     isApplyingViewPreference: function () { return applyingViewPreference; },
                     onLogReceived: onStateReceived,
