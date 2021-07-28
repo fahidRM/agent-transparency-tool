@@ -43,6 +43,8 @@ angular.module('app.transparency_dashboard', [])
                 vm.selectedViewPreference = {};          // view preference being viewed
                 vm.serverIsRunning = false;              // debugger status
                 vm.searchString = "";                    // kb-search string
+                vm.senseOverlayData = {value: "", source: "", type: ""};
+                vm.showSenseOverlay = false;
                 vm.viewPreference = []                   //  view preferences
 
                 /** D3 variables **/
@@ -208,6 +210,7 @@ angular.module('app.transparency_dashboard', [])
                  * Toggles the server on/off
                  */
                 vm.toggleServer = function() {
+
                     if (vm.serverIsRunning) {
                         server.stop();
                     } else {
@@ -215,6 +218,15 @@ angular.module('app.transparency_dashboard', [])
                         server.start();
                     }
                     vm.serverIsRunning = !vm.serverIsRunning;
+                }
+
+                vm.displayFullSensorReading = function (sense) {
+                   vm.senseOverlayData = sense;
+                    vm.showSenseOverlay = true;
+                }
+
+                vm.hideFullSensorReading =  function ($index) {
+                    vm.showSenseOverlay = false;
                 }
 
                 /**

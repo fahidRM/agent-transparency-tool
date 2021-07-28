@@ -44,7 +44,10 @@
                                        ng-change="dashboard.searchKnowledgeBase()"
                                        placeholder="search knowledge-base">
                             </li>
-                            <li class="list-group-item" ng-repeat="belief in dashboard.filteredKnowledgeBase">
+                            <li class="list-group-item list-group-item-b"
+                                ng-repeat="belief in dashboard.filteredKnowledgeBase"
+                                ng-mouseover="dashboard.displayFullSensorReading(belief)"
+                                ng-mouseleave="dashboard.hideFullSensorReading()">
                                 <img class="img-circle media-object pull-left"
                                      ng-src="assets/images/source/{{dashboard.getIcon(belief)}}.png"
                                      width="32" height="32">
@@ -105,12 +108,24 @@
                                         {{agent}}
                                     </a>
                                 </div>
+                                <div class="overlay-content" ng-show = "dashboard.showSenseOverlay">
+                                    <strong><u>KNOWLEDGE BASE ENTRY</u></strong>
+                                    <br><br>
+                                    <strong>{{dashboard.senseOverlayData.value}}</strong>
+                                    <br>
+                                    source: <i>{{dashboard.senseOverlayData.source}}</i>
+                                    <br>
+                                    Type: <i>{{dashboard.senseOverlayData.type}}</i>
+
+                                </div>
                             </button>
                             <span class="pull-right"><b>Visualising: {{dashboard.agents.selected || "None"}} &nbsp;&nbsp;</b></span>
                         </div>
 
 
                     </header>
+
+
                     <!-- Visualisation -->
                     <div id="visualisation_board" class="fit-and-scroll">
                     </div>
@@ -149,6 +164,7 @@
             </div>
         </footer>
     </div>
+
     </body>
 
     <!-- angular templates -->
@@ -162,7 +178,7 @@
                            ng-change="bb.search()"
                            placeholder="Search">
                 </li>
-                <li class="list-group-item" ng-repeat="belief in bb.filteredBeliefs">
+                <li class="list-group-item list-group-item-b" ng-repeat="belief in bb.filteredBeliefs">
                     <img class="img-circle media-object pull-left"
                          ng-src="assets/images/source/{{bb.getIcon(belief)}}.png"
                          width="32" height="32">
