@@ -57,6 +57,7 @@ angular.module('app.server', [])
                     app.post('/log', (req, res) => {
                         // inform client that request has been received
                         res.send();
+                        console.log("Received: \n\t", req.body);
                         let payload =  req.body.log || req.body.msg || {};
                         onLogReceived(payload);
                     });
@@ -83,7 +84,6 @@ angular.module('app.server', [])
                     http.close();
                     isRunning = false;
                 }
-
 
                 // service API
                 return {
